@@ -1,6 +1,6 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
-import { useKaidahData } from 'hooks/useKaidahData'
+import { useDalilData } from 'hooks/useDalilData'
 import LoadingScreen from 'components/LoadingScreen'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 
@@ -11,8 +11,8 @@ function ucfirst(str: string) {
 
 export default function KaidahList() {
     const router = useRouter()
-    const { jenisTemaId, temaId } = useLocalSearchParams<{ jenisTemaId: string, temaId: string }>()
-    const { data, loading, error, refetch } = useKaidahData(temaId)
+    const { temaId } = useLocalSearchParams<{ jenisTemaId: string, temaId: string }>()
+    const { data, loading, error, refetch } = useDalilData(temaId)
 
     if (loading && !data) {
         return <LoadingScreen message="Memuat data eko media..." />
@@ -27,7 +27,7 @@ export default function KaidahList() {
             <View className="flex-1 justify-center items-center bg-white px-5">
                 <Ionicons name="warning" size={48} color="#6B7280" />
                 <Text className="mt-4 text-lg font-bold text-gray-900">
-                    Gagal memuat data Eko Kaidah
+                    Gagal memuat data Eko Ayat Hadist
                 </Text>
                 <Text className="mt-2 text-sm text-gray-500 text-center mb-5">
                     {error}
@@ -80,44 +80,40 @@ export default function KaidahList() {
 
                 {/* <View className="h-px bg-gray-300 my-4" /> */}
 
-                {data?.kaidah.map((kaidah) => (
-                    <Pressable key={kaidah.id} className="bg-white p-4 rounded-xl shadow-lg mb-4">
+                {data?.dalil.map((dalil) => (
+                    <Pressable key={dalil.id} className="bg-white p-4 rounded-xl shadow-lg mb-4">
                         <View className="flex-row mb-3 items-center bg-green-50 px-2 py-1 rounded gap-1">
                             <Ionicons name="checkmark-circle" size={16} color="#16A34A" />
-                            <Text className="text-green-700 text-lg font-semibold">Kaidah {ucfirst(kaidah.jenis_kaidah)}</Text>
+                            <Text className="text-green-700 text-lg font-semibold">{ucfirst(dalil.jenis)}</Text>
                         </View>
                         <View className="mb-3 bg-primary px-3 py-1.5 rounded items-end">
-                            <Text className="text-dark text-xl text-right">
-                                {kaidah.kaidah}
+                            <Text className="text-dark text-xl text-right leading-10">
+                                {dalil.teks_asli}
                             </Text>
                         </View>
 
-                        <Text className="text-gray-900 text-sm leading-5 mb-4">
-                            {kaidah.kaidah_latin}
-                        </Text>
-
                         {/* Teaching Methods */}
                         <View className="flex-col gap-3 mb-4">
-                            {kaidah.terjemahan && (
+                            {dalil.terjemahan && (
                                 <View className="bg-gray-50 p-3 rounded-lg items-center">
                                     <MaterialCommunityIcons name="abjad-arabic" size={16} color="#16A34A" />
-                                    <Text className="text-gray-500 text-sm mt-1 mb-2">Terjemahan</Text>
-                                    <Text className="text-gray-900 text-xs font-semibold">{kaidah.terjemahan}</Text>
+                                    <Text className="text-gray-500 text-md mt-1 mb-2">Terjemahan</Text>
+                                    <Text className="text-gray-900 text-md italic">{dalil.terjemahan} {dalil.sumber}</Text>
                                 </View>
                             )}
 
-                            {kaidah.deskripsi && (
+                            {dalil.penjelasan && (
                                 <View className="bg-gray-50 p-3 rounded-lg items-center">
                                     <MaterialCommunityIcons name="billboard" size={16} color="#16A34A" />
-                                    <Text className="text-gray-500 text-sm my-2">Penjelasan</Text>
-                                    <Text className="text-gray-900 text-xs mb-2 font-semibold">{kaidah.deskripsi}</Text>
+                                    <Text className="text-gray-500 text-md my-2">Penjelasan</Text>
+                                    <Text className="text-gray-900 text-md mb-2 ">{dalil.penjelasan}</Text>
                                 </View>
                             )}
                         </View>
                     </Pressable>
                 ))}
 
-                {data?.kaidah.length === 0 && (
+                {data?.dalil.length === 0 && (
                     <View className="items-center py-10 px-5">
                         <Ionicons name="document-text" size={64} color="#6B7280" />
                         <Text className="text-lg font-bold text-gray-900 mt-4 mb-2">

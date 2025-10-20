@@ -1,7 +1,7 @@
 // app/(tabs)/_layout.tsx
 import { Tabs } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '../../constants/Colors';
+import { Colors } from 'constants/Colors';
 
 export default function TabLayout() {
   return (
@@ -54,27 +54,23 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="cp"
+        name="dalil"
         options={{
-          title: 'CP',
+          title: 'Eko Ayat Hadist',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="checkbox" size={size} color={color} />
+            <MaterialCommunityIcons name="book-open-blank-variant" size={size} color={color} />
           ),
-          tabBarLabelStyle: {
-            fontSize: 8,
-          },
+          tabBarLabelStyle: { fontSize: 8 },
         }}
       />
       <Tabs.Screen
-        name="ayat"
+        name="refleksi"
         options={{
-          title: 'EKO Ayat Hadist',
+          title: 'Eko Refleksi',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="book" size={size} color={color} />
+            <MaterialCommunityIcons name="clipboard-edit" size={size} color={color} />
           ),
-          tabBarLabelStyle: {
-            fontSize: 8,
-          },
+          tabBarLabelStyle: { fontSize: 8 },
         }}
       />
     </Tabs>

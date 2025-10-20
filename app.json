@@ -32,6 +32,7 @@
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
+      "softwareKeyboardLayoutMode": "pan",
       "package": "com.arizainalf.ekotaqwa"
     },
     "extra": {
