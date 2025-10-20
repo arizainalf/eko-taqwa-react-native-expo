@@ -1,0 +1,105 @@
+import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { useLocalSearchParams } from 'expo-router'
+import { useMetodeData } from 'hooks/useMetodeData'
+import LoadingScreen from 'components/LoadingScreen'
+import { useRouter } from 'expo-router'
+import ItemCard from 'components/ItemCard'
+
+function ucfirst(str: string) {
+  if (!str) return str; // Jaga-jaga jika string-nya kosong
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export default function MetodeList() {
+  const router = useRouter()
+  const { faseId, mapelId } = useLocalSearchParams<{ faseId: string, mapelId: string }>()
+  const { data, loading, error, refetch } = useMetodeData(faseId, mapelId)
+
+  if (loading && !data) {
+    return <LoadingScreen message="Memuat data metode..." />
+  }
+
+  const onRefresh = async () => {
+    await refetch()
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white px-5">
+        <Ionicons name="warning" size={48} color="#6B7280" />
+        <Text className="mt-4 text-lg font-bold text-gray-900">
+          Gagal memuat data metode
+        </Text>
+        <Text className="mt-2 text-sm text-gray-500 text-center mb-5">
+          {error}
+        </Text>
+        <Pressable
+          className="bg-green-600 px-5 py-3 rounded-lg"
+          onPress={refetch}
+        >
+          <Text className="text-white text-base font-semibold">Coba Lagi</Text>
+        </Pressable>
+      </View>
+    )
+  }
+
+  return (
+    <ScrollView
+      className="flex-1 bg-white"
+      refreshControl={
+        <RefreshControl
+          refreshing={loading}
+          onRefresh={onRefresh}
+          colors={['#16A34A']}
+        />
+      }
+    >
+      <View className="py-10 sm:h-60 h-96 px-6 bg-green-600 rounded-b-2xl">
+
+        <View className="flex-row items-center">
+
+          <Pressable
+            onPress={() => router.back()}
+            className="mr-4 px-1"
+          >
+            <Ionicons name="arrow-back" size={28} color="white" />
+          </Pressable>
+
+          <View>
+            <Text className="text-2xl font-bold text-white mb-1">
+              Metode Pembelajaran
+            </Text>
+            <Text className="text-base text-green-100">
+              Daftar metode pembelajaran
+            </Text>
+          </View>
+
+        </View>
+      </View>
+
+      <View className="p-5 mx-3 bg-white -mt-64 rounded-2xl min-h-[200px]">
+
+        {data?.metode.map((metode: any) => (
+          <ItemCard
+            key={metode.metode_pembelajaran}
+            title={'Di ' + ucfirst(metode.metode_pembelajaran)}
+            value={`${metode.total + ' Capaian Pembelajaran'}`}
+            href={`/fase/${faseId}/${mapelId}/${metode.metode_pembelajaran}`}
+          />
+        ))}
+
+        {data?.metode.length === 0 && (
+          <View className="items-center py-10 px-5">
+            <Ionicons name="document-text" size={64} color="#6B7280" />
+            <Text className="text-lg font-bold text-gray-900 mt-4 mb-2">
+              Tidak Ada Data Metode
+            </Text>
+          </View>
+        )}
+
+      </View>
+
+    </ScrollView>
+  )
+}
