@@ -11,12 +11,14 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { usePostDetail } from 'hooks/useRefleksiHarianDetail'
+import { useDevice } from 'context/deviceContext'
 
 export default function PostDetailScreen() {
     const router = useRouter()
     const { id } = useLocalSearchParams()
     const { post, loading } = usePostDetail(id as string)
-    const currentDeviceId = '123123123'
+    const { deviceId } = useDevice()
+    const currentDeviceId = deviceId
 
     if (loading) {
         return (
@@ -32,7 +34,7 @@ export default function PostDetailScreen() {
             <View className="flex-1 bg-white justify-center items-center">
                 <Ionicons name="alert-circle" size={64} color="#9CA3AF" />
                 <Text className="text-gray-500 text-lg mt-4">
-                    Postingan tidak ditemukan
+                    Refleksi harian tidak ditemukan
                 </Text>
                 <Pressable
                     onPress={() => router.back()}
@@ -68,13 +70,13 @@ export default function PostDetailScreen() {
                     </Pressable>
                     <View className="flex-1">
                         <Text className="text-2xl font-bold text-white mb-1">
-                            Detail Postingan
+                            Detail Refleksi Harian
                         </Text>
                         {isMyDevice && (
                             <View className="flex-row items-center">
                                 <Ionicons name="star" size={14} color="#BBF7D0" />
                                 <Text className="text-green-100 text-sm ml-1">
-                                    Postingan Anda
+                                    Refleksi Harian Anda
                                 </Text>
                             </View>
                         )}
@@ -90,11 +92,13 @@ export default function PostDetailScreen() {
                 <View className="bg-white mx-4 rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     {/* Gambar */}
                     {post.gambar && (
-                        <Image
-                            source={{ uri: post.gambar }}
-                            className="w-full h-64"
-                            resizeMode="cover"
-                        />
+                        <View className='p-4'>
+                            <Image
+                                source={{ uri: post.gambar }}
+                                className="w-full h-64 rounded-md"
+                                resizeMode="cover"
+                            />
+                        </View>
                     )}
 
                     {/* Content */}

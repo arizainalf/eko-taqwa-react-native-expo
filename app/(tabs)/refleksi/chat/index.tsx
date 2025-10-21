@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useChatData } from 'hooks/useChatData'
+import { useDevice } from 'context/deviceContext'
 
 type MessageItem = {
     id: string;
@@ -49,8 +50,8 @@ MessageBubble.displayName = 'MessageBubble'
 
 export default function AiChatScreen() {
     const router = useRouter()
-    const deviceId = '123123123'
-    const { messages, loading, sendMessage, isSending } = useChatData(deviceId)
+    const { deviceId } = useDevice()
+    const { messages, loading, sendMessage, isSending } = useChatData(deviceId ?? '')
     const [input, setInput] = useState('')
     const flatListRef = useRef<FlatList>(null)
     const [keyboardVisible, setKeyboardVisible] = useState(false)
@@ -110,7 +111,7 @@ export default function AiChatScreen() {
     const handleSend = useCallback(() => {
         if (!input.trim() || isSending) return
 
-        sendMessage(deviceId, input)
+        sendMessage(deviceId ?? '', input)
         setInput('')
 
         setTimeout(() => {

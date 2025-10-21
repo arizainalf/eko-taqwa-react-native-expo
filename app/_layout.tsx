@@ -1,50 +1,78 @@
-import { Stack } from 'expo-router'
+// app/_layout.tsx
+
+import { Stack, useRouter, useSegments } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { useEffect, useState } from 'react'
-import { View, ActivityIndicator, Text, Image } from 'react-native'
+import { useEffect } from 'react'
+import * as SplashScreen from 'expo-splash-screen'
+
+// Impor Context dan Hook yang sudah dibuat
+import { DeviceProvider, useDevice } from 'context/deviceContext'
+
+// Impor file CSS global Anda
 import '../global.css'
 
-export default function RootLayout() {
-  const [isLoading, setIsLoading] = useState(true)
+// 1. Jaga agar Splash Screen tetap terlihat saat aplikasi memuat
+SplashScreen.preventAutoHideAsync()
+
+// 2. Buat komponen navigasi terpisah yang akan dibungkus oleh Provider
+function RootLayoutNav() {
+  // Ambil status loading dan nama pengguna dari Context
+  const { isLoading, name } = useDevice()
+  const router = useRouter()
+  const segments = useSegments()
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000)
-    return () => clearTimeout(timer)
-  }, [])
+    // Jika masih dalam proses memuat data dari AsyncStorage, jangan lakukan apa-apa
+    if (isLoading) {
+      return
+    }
 
-  if (isLoading) return <LoadingScreen />
+    // Cek apakah pengguna sedang berada di dalam grup (auth)
+    const inAuthGroup = segments[0] === '(auth)'
 
+    if (name && inAuthGroup) {
+      // KASUS 1: Pengguna SUDAH punya nama, TAPI masih di halaman auth (register).
+      // Arahkan ke halaman utama (tabs).
+      router.replace('/(tabs)')
+    } else if (!name && !inAuthGroup) {
+      // KASUS 2: Pengguna BELUM punya nama, TAPI tidak di halaman auth.
+      // Paksa pengguna ke halaman register.
+      router.replace('/(auth)/register')
+    }
+
+    // 3. Setelah semua logika selesai, sembunyikan Splash Screen
+    SplashScreen.hideAsync()
+  }, [isLoading, name, segments, router])
+
+  // Selama loading, tampilkan null. Splash Screen bawaan akan terlihat.
+  if (isLoading) {
+    return null
+  }
+
+  // Setelah selesai loading, tampilkan navigator utama
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
+        {/* Rute-rute yang sudah Anda miliki */}
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="tema" />
         <Stack.Screen name="kuis" />
         <Stack.Screen name="video" />
+        {/* TAMBAHKAN rute untuk grup auth */}
+        <Stack.Screen name="(auth)" />
       </Stack>
       <StatusBar style="auto" />
     </>
   )
 }
 
-function LoadingScreen() {
+// 4. Ini adalah komponen utama yang diekspor
+export default function RootLayout() {
+  // Bungkus seluruh aplikasi dengan DeviceProvider agar semua halaman
+  // bisa mengakses data pengguna (nama & deviceId)
   return (
-    <View className="flex-1 justify-center items-center bg-white px-5">
-      <View className="items-center mb-12">
-        <Image
-          source={require('../assets/logo.png')}
-          className="w-[100px] h-[100px]"
-        />
-        <Text className="text-base text-gray-500 text-center mt-3">
-          Memulai Perubahan Kecil, Mencipta Lingkungan Lestari.
-        </Text>
-      </View>
-
-      <ActivityIndicator size="large" color="#16A34A" />
-
-      <Text className="mt-5 text-base text-gray-500">
-        Memuat aplikasi...
-      </Text>
-    </View>
+    <DeviceProvider>
+      <RootLayoutNav />
+    </DeviceProvider>
   )
 }
