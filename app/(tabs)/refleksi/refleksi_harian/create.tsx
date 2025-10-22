@@ -40,7 +40,7 @@ export default function CreateRefleksiPage() {
 
         // Membuka galeri gambar
         let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ['images'],
             allowsEditing: true,
             aspect: [4, 3], // Sesuaikan aspect ratio jika perlu
             quality: 0.7,    // Kompresi gambar agar tidak terlalu besar

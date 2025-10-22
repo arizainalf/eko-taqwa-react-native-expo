@@ -7,7 +7,7 @@ export default function RootLayout() {
         <>
             <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
-                <Stack.Screen name="{mediaId}" />
+                <Stack.Screen name="[temaId]" />
             </Stack>
             <StatusBar style="auto" />
         </>

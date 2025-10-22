@@ -81,7 +81,7 @@ export default function MediaList() {
                         key={media.id}
                         title={media.judul}
                         value={`${media.deskripsi}`}
-                        href={`/media/${jenisTemaId}/${temaId}/${media.id}`}
+                        href={`/media/[jenisTemaId]/[temaId]/${media.id}`}
                     />
                 ))}
 

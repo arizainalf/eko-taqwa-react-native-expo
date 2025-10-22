@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "scheme": "ekotaqwa",
     "web": {
+      "bundler": "metro",
       "favicon": "./assets/favicon.png"
     },
     "experiments": {
@@ -14,7 +15,7 @@
       "expo-router"
     ],
     "orientation": "portrait",
-    "icon": "./assets/logo.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -29,7 +30,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
       "softwareKeyboardLayoutMode": "pan",
@@ -38,8 +39,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "fe3fe01b-93d3-4bf0-98a8-ad43283bc9ab"
+        "projectId": "19b4acaa-912b-4a92-82d7-9a5018e721f0"
       }
-    }
+    },
+    "owner": "arizainalf"
   }
 }

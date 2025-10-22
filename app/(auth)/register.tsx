@@ -28,13 +28,13 @@ export default function RegisterScreen() {
         <SafeAreaView className="flex-1 bg-gray-100 justify-center p-6">
             <View className="bg-white p-6 rounded-lg shadow-md">
                 <View className='items-center'>
-                <Image
+                    {/* <Image
                     // Gunakan require() untuk gambar lokal
                     source={require('assets/logo.png')} 
                     // Tambahkan styling agar ukuran gambar pas
                     className="w-24 h-24 mb-6" 
                     resizeMode="contain" // Pastikan gambar tidak terpotong
-                />
+                /> */}
                 </View>
                 <Text className="text-2xl font-bold text-center mb-5">Selamat Datang!</Text>
                 <Text className="text-base text-gray-600 text-center mb-6">

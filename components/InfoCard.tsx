@@ -1,7 +1,6 @@
 import { Pressable, View, Text } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
-
 interface CardProps {
   title: string
   value: string | number
@@ -14,22 +13,41 @@ export default function InfoCard({
   title,
   value,
   icon,
-  color = '#f59e0b',
+  color = '#f59e0b', // Tetap gunakan default oranye
   onPress,
 }: CardProps) {
   return (
     <Pressable
       onPress={onPress}
-      className="w-[48%] bg-white px-4 py-5 rounded-xl shadow-lg active:bg-gray-50 flex-row justify-between"
+      // 1. Styling kartu utama: w-[48%], shadow lebih tipis, items-center
+      className="w-[48%] bg-white p-4 rounded-xl border border-gray-100  shadow-sm active:bg-gray-50 flex-row justify-between items-center"
     >
-      <View>
-        <Text className="self-start py-2 rounded-lg mb-2 text-gray-900 text-sm font-bold">{title}</Text>
-        <Text className="self-start bg-green-100 px-4 py-2 rounded text-green-500 text-xl font-bold">{value}</Text>
+      {/* 2. Grup Teks (Kiri) */}
+      <View className="flex-1 mr-2">
+
+        {/* Title: Dijadikan label kecil, abu-abu, uppercase */}
+        <Text
+          className="text-gray-500 text-xs font-medium uppercase tracking-wide"
+          numberOfLines={1} // Mencegah teks panjang merusak layout
+        >
+          {title}
+        </Text>
+
+        {/* Value: Dijadikan data utama yang besar dan tebal */}
+        <Text
+          className="text-gray-900 text-2xl font-bold"
+          numberOfLines={1} // Mencegah teks panjang merusak layout
+        >
+          {value}
+        </Text>
+
       </View>
+
+      {/* 3. Ikon (Kanan) */}
       <View className="justify-center items-center">
-        <MaterialCommunityIcons name={icon} size={24} color={color} />
+        {/* Ukuran ikon sedikit diperbesar agar lebih jelas */}
+        <MaterialCommunityIcons name={icon} size={28} color={color} />
       </View>
-      {/* Header: title + icon */}
     </Pressable>
   )
 }

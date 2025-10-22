@@ -1,7 +1,6 @@
 import { Pressable, View, Text } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
-
 interface CardProps {
   title: string
   value: string | number
@@ -14,37 +13,39 @@ export default function InfoCardFull({
   title,
   value,
   icon,
-  color = '#f59e0b',
+  color = '#059669', // Default hijau
   onPress,
 }: CardProps) {
   return (
     <Pressable
       onPress={onPress}
-      // [DIUBAH] 'items-center' ditambahkan agar icon sejajar di tengah
-      // jika blok teksnya menjadi lebih tinggi (karena wrapping)
-      className="bg-white px-4 py-5 rounded-xl shadow-lg flex-row justify-between items-center"
+      // 1. Layout dikembalikan seperti asli: 
+      // justify-between akan mendorong teks ke kiri & ikon ke kanan
+      className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex-row items-center justify-between space-x-4 active:bg-gray-50"
     >
-      {/* [DIUBAH] 'flex-1' dan 'mr-4' ditambahkan 
-          - 'flex-1': Membuat View ini mengambil semua sisa ruang
-          - 'mr-4': Memberi jarak agar teks tidak menempel ke icon
-      */}
-      <View className="flex-1 mr-4">
-        {/* [DIHAPUS] 'self-start' dihapus dari title agar teks bisa wrap penuh
-            [DIUBAH] 'py-2' menjadi 'pb-2' (padding-bottom) agar lebih rapi
-        */}
-        <Text className="pb-2 rounded-lg mb-2 text-gray-900 text-md font-bold">
+      {/* 2. Grup Teks (di Kiri) */}
+      <View className="flex-1">
+
+        {/* Title: Styling baru (label kecil) */}
+        <Text className="text-gray-500 text-sm font-medium uppercase tracking-wide">
           {title}
         </Text>
 
-        <Text className="self-start bg-green-100 px-4 py-2 rounded text-green-500 text-xl font-bold">
+        {/* Value: Styling baru (data besar) */}
+        <Text className="text-gray-900 text-2xl font-bold">
           {value}
         </Text>
+
       </View>
 
-      {/* View untuk icon ini tidak perlu diubah */}
-      <View className="justify-center items-center">
-        <MaterialCommunityIcons name={icon} size={38} color={color} />
+      {/* 3. Ikon (di Kanan) */}
+      <View
+        style={{ backgroundColor: color }}
+        className="w-12 h-12 rounded-lg items-center justify-center"
+      >
+        <MaterialCommunityIcons name={icon} size={28} color="white" />
       </View>
+
     </Pressable>
   )
 }

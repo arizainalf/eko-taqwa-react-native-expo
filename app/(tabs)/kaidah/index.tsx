@@ -71,7 +71,7 @@ export default function JenisTemaList() {
                     <ItemCard
                         key={jenisTema.id}
                         title={jenisTema.nama}
-                        value={`${jenisTema.tema_count}`}
+                        value={`${jenisTema.tema_count + ' Tema'}`}
                         href={`/kaidah/${jenisTema.id}`}
                     />
                 ))}

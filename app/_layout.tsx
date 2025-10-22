@@ -55,10 +55,6 @@ function RootLayoutNav() {
       <Stack screenOptions={{ headerShown: false }}>
         {/* Rute-rute yang sudah Anda miliki */}
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="tema" />
-        <Stack.Screen name="kuis" />
-        <Stack.Screen name="video" />
-        {/* TAMBAHKAN rute untuk grup auth */}
         <Stack.Screen name="(auth)" />
       </Stack>
       <StatusBar style="auto" />
