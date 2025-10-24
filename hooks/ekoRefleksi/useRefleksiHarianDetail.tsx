@@ -1,10 +1,15 @@
 // hooks/usePostDetail.ts
 import { useState, useEffect, useCallback } from 'react'
-// Pastikan path import ini benar dan tipe 'Post' diekspor dari file tersebut
+import { apiGet, apiDelete, STORAGE_BASE_URL } from 'utils/api'
 import { Post } from 'hooks/ekoRefleksi/useRefleksiHarianData'
 
-const STORAGE_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/storage/'
-const API_URL = 'https://ekotaqwa.bangkoding.my.id/api'
+interface PostDetailResponse {
+    success: boolean;
+    code: number;
+    message: string;
+    data: Post;
+    timestamp: string;
+}
 
 export function usePostDetail(postId: string) {
     const [post, setPost] = useState<Post | null>(null)
@@ -18,12 +23,12 @@ export function usePostDetail(postId: string) {
             } else {
                 setLoading(true)
             }
-            const res = await fetch(`${API_URL}/v1/refleksi/harian/${postId}`)
-            const data = await res.json()
 
-            if (data?.success && data.data) {
-                // === MODIFIKASI DIMULAI ===
-                const fetchedPost: Post = data.data
+            // Gunakan apiGet dari utils dengan type yang spesifik
+            const data = await apiGet<PostDetailResponse['data']>(`/v1/refleksi/harian/${postId}`)
+
+            if (data) {
+                const fetchedPost: Post = data
 
                 // Cek jika post memiliki gambar, lalu gabungkan dengan URL storage
                 if (fetchedPost.gambar) {
@@ -31,29 +36,22 @@ export function usePostDetail(postId: string) {
                 }
 
                 setPost(fetchedPost) // Set post yang sudah dimodifikasi
-                // === MODIFIKASI SELESAI ===
             } else {
                 setPost(null) // Set null jika tidak sukses atau data.data kosong
             }
         } catch (err) {
             console.error('Failed to fetch post detail:', err)
+            setPost(null) // Pastikan set null jika error
         } finally {
             setLoading(false)
+            setRefreshing(false)
         }
     }
 
     const deletePost = async (id: string) => {
         try {
-            await fetch(`${API_URL}/v1/refleksi/harian/${id}`,
-                {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                }
-            )
-
+            // Gunakan apiDelete dari utils
+            await apiDelete(`/v1/refleksi/harian/${id}`)
         } catch (error) {
             console.error('Gagal menghapus:', error)
             throw error
@@ -61,8 +59,10 @@ export function usePostDetail(postId: string) {
     }
 
     const onRefresh = useCallback(() => {
-        fetchPostDetail(true)
-    }, [fetchPostDetail])
+        if (postId) {
+            fetchPostDetail(true)
+        }
+    }, [postId, fetchPostDetail])
 
     useEffect(() => {
         if (postId) {
@@ -70,8 +70,12 @@ export function usePostDetail(postId: string) {
         }
     }, [postId])
 
-
-
-
-    return { post, loading , deletePost, onRefresh}
+    return {
+        post,
+        loading,
+        refreshing,
+        deletePost,
+        onRefresh,
+        refetch: () => fetchPostDetail(true) // Optional: tambahkan refetch function
+    }
 }

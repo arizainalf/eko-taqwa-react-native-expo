@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiGet } from 'utils/api';
 
 // Types berdasarkan response API
 export interface CpItem {
@@ -29,28 +30,10 @@ export interface ApiResponse {
 // Real API function
 const fetchCpData = async (): Promise<ApiResponse['data']> => {
   try {
-    // Ganti dengan URL API Anda
-    const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
+    const result = await apiGet(`/v1/cp`);
 
-    const response = await fetch(`${API_BASE_URL}/v1/cp`, { // Sesuaikan endpoint
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // Tambahkan headers lain jika diperlukan
-      },
-    });
+    return result as ApiResponse['data'];
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result: ApiResponse = await response.json();
-
-    if (!result.success) {
-      throw new Error(result.message || 'Failed to fetch CP data');
-    }
-
-    return result.data;
   } catch (error) {
     console.error('Error fetching CP data:', error);
     throw error;

@@ -75,7 +75,6 @@ export default function JenisTemaList() {
                     title={'Refleksi Harian'}
                     value={`${data?.refleksi + ' Refleksi Harian'}`}
                     href={`/refleksi/refleksi_harian`} />
-
             </View>
 
         </ScrollView>

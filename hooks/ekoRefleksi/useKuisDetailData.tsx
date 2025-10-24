@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { apiGet } from 'utils/api'
 
 // URL API Anda
 const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api'
@@ -33,6 +34,14 @@ export type KuisDetailData = {
     hasil_kuis: HasilKuis // Array dari riwayat pengerjaan
 }
 
+interface KuisDetailResponse {
+    success: boolean;
+    data: KuisDetailData;
+    message?: string;
+    code?: number;
+    timestamp?: string;
+}
+
 export function useKuisDetailData(kuisId: string, deviceId: string) {
     const [data, setData] = useState<KuisDetailData | null>(null)
     const [loading, setLoading] = useState(true)
@@ -45,14 +54,13 @@ export function useKuisDetailData(kuisId: string, deviceId: string) {
 
         try {
             setLoading(true)
-            // Sesuai route: /kuis/{id}/device/{deviceId}
-            const res = await fetch(`${API_BASE_URL}/v1/refleksi/kuis/${kuisId}/device/${deviceId}`)
-            const responseData = await res.json()
 
-            if (responseData?.success) {
-                setData(responseData.data)
+            const responseData = await apiGet(`/v1/refleksi/kuis/${kuisId}/device/${deviceId}`) as KuisDetailResponse['data']
+
+            if (responseData) {
+                setData(responseData)
             } else {
-                console.error('Failed to parse kuis detail:', responseData.message)
+                console.error('Failed to parse kuis detail')
                 setData(null)
             }
         } catch (err) {

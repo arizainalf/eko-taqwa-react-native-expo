@@ -1,28 +1,41 @@
 import { useState, useEffect, useCallback } from 'react'
+import { apiGet, apiPost } from 'utils/api' // Import utils API
 import { HasilKuis } from './useKuisDetailData' // Asumsi tipe dari hook sebelumnya
-
-const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api'
 
 // --- Tipe Data berdasarkan Controller 'pertanyaan' ---
 type OpsiPertanyaan = {
     id: string
     jawaban: string
 }
+
 type Pertanyaan = {
     id: string
     teks_pertanyaan: string
     poin: number
     opsi: OpsiPertanyaan[]
 }
+
 type PertanyaanData = {
     nomor: number
     total: number
     pertanyaan: Pertanyaan
 }
 
-// Tipe untuk menyimpan jawaban
 type JawabanMap = {
-    [pertanyaanId: string]: string // cth: { "pertanyaan-uuid": "opsi-uuid" }
+    [pertanyaanId: string]: string
+}
+
+// Interface untuk API responses
+interface PertanyaanResponse {
+    success: boolean
+    data: PertanyaanData
+    message?: string
+}
+
+interface SubmitKuisResponse {
+    success: boolean
+    data: HasilKuis
+    message?: string
 }
 
 export function useKuisEngine(kuisId: string, deviceId: string) {
@@ -42,10 +55,10 @@ export function useKuisEngine(kuisId: string, deviceId: string) {
         setLoading(true)
         try {
             // Route: /kuis/{id}/pertanyaan?offset=...
-            const res = await fetch(`${API_BASE_URL}/v1/refleksi/kuis/${kuisId}/pertanyaan?offset=${offset}`)
-            const data = await res.json()
-            if (data.success) {
-                setQuestionData(data.data)
+            const data = await apiGet(`/v1/refleksi/kuis/${kuisId}/pertanyaan?offset=${offset}`) as PertanyaanResponse['data']
+
+            if (data) {
+                setQuestionData(data)
             } else {
                 // Kemungkinan kuis selesai (API mengembalikan 404)
                 setQuestionData(null)
@@ -54,6 +67,11 @@ export function useKuisEngine(kuisId: string, deviceId: string) {
             }
         } catch (err) {
             console.error('Gagal mengambil pertanyaan:', err)
+            // Handle error case - mungkin kuis sudah selesai
+            if ((err as Error).message.includes('404') || (err as Error).message.includes('tidak ditemukan')) {
+                setQuestionData(null)
+                await submitKuis()
+            }
         } finally {
             setLoading(false)
         }
@@ -75,37 +93,27 @@ export function useKuisEngine(kuisId: string, deviceId: string) {
 
         try {
             // Route: POST /kuis
-            const res = await fetch(`${API_BASE_URL}/v1/refleksi/kuis`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    device_id: deviceId,
-                    kuis_id: kuisId,
-                    jawaban: jawaban,
-                    waktu_pengerjaan: waktuPengerjaan,
-                }),
-            })
-            const data = await res.json()
-            if (data.success) {
-                setFinalResult(data.data)
+            const data = await apiPost('/v1/refleksi/kuis', {
+                device_id: deviceId,
+                kuis_id: kuisId,
+                jawaban: jawaban,
+                waktu_pengerjaan: waktuPengerjaan,
+            }) as SubmitKuisResponse['data']
+
+            if (data) {
+                setFinalResult(data)
             } else {
-                // --- 2. INI PERUBAHANNYA ---
-                const errorMessage = data.message || 'Gagal menyimpan hasil: API tidak memberikan pesan.'
-                // Tampilkan di log konsol Anda
+                const errorMessage = data || 'Gagal menyimpan hasil: API tidak memberikan pesan.'
                 console.error('Kuis Submit Error (API):', errorMessage, data)
-                setSubmitError(errorMessage) // Simpan pesan error ke state
+                setSubmitError(errorMessage)
             }
         } catch (err) {
             const errorMessage = (err as Error).message || 'Gagal terhubung ke server.'
-            // Tampilkan di log konsol Anda
             console.error('Kuis Submit Error (Network/Parse):', err)
-            setSubmitError(errorMessage) // Simpan pesan error ke state
+            setSubmitError(errorMessage)
         } finally {
             setIsSubmitting(false)
-            setIsFinished(true) // Tampilkan layar hasil
+            setIsFinished(true)
         }
     }
 
@@ -126,8 +134,8 @@ export function useKuisEngine(kuisId: string, deviceId: string) {
     // 5. Load pertanyaan pertama saat hook dijalankan
     useEffect(() => {
         if (kuisId && deviceId) {
-            setStartTime(Date.now()) // Catat waktu mulai
-            fetchNextQuestion(0) // Ambil pertanyaan pertama (offset 0)
+            setStartTime(Date.now())
+            fetchNextQuestion(0)
         }
     }, [kuisId, deviceId, fetchNextQuestion])
 
@@ -140,5 +148,6 @@ export function useKuisEngine(kuisId: string, deviceId: string) {
         isFinished,
         isSubmitting,
         finalResult,
+        submitError, // Export submitError juga untuk ditampilkan di UI
     }
 }

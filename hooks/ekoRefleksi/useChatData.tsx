@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { apiGet, apiPost } from 'utils/api'
 
 export function useChatData(deviceId: string) {
     const [messages, setMessages] = useState<any[]>([])
@@ -10,11 +11,10 @@ export function useChatData(deviceId: string) {
     const fetchMessages = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await fetch(`${API_URL}/v1/refleksi/chat/${deviceId}`)
-            const data = await res.json()
+            const data = await apiGet<any>(`/v1/refleksi/chat/${deviceId}`)
 
-            if (data?.success) {
-                const formatted = data.data.map((item: any) => [
+            if (data) {
+                const formatted = data.map((item: any) => [
                     {
                         id: `${item.id}-user`,
                         sender: 'user' as const,
@@ -48,21 +48,15 @@ export function useChatData(deviceId: string) {
 
             setMessages(prev => [...prev, userMessage])
 
-            const res = await fetch(`${API_URL}/v1/refleksi/chat/send`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    device_id: deviceId,
-                    message: text,
-                }),
-            })
-
-            const result = await res.json()
-            if (result?.data?.reply) {
+            const result = await apiPost('/v1/refleksi/chat/send', {
+                device_id: deviceId,
+                message: text,
+            }) as any
+            if (result?.reply) {
                 const botMessage = {
                     id: `bot-${Date.now()}-${Math.random()}`,
                     sender: 'bot' as const,
-                    text: result.data.reply
+                    text: result.reply
                 }
                 setMessages(prev => [...prev, botMessage])
             }

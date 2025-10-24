@@ -1,5 +1,6 @@
 // hooks/useKuisData.ts
 import { useState, useEffect, useCallback } from 'react'
+import { apiGet } from 'utils/api'
 
 // Tipe data berdasarkan respons controller kuis() Anda
 export type KuisItem = {
@@ -15,8 +16,13 @@ export type KuisData = {
     kuis: KuisItem[]
 }
 
-// URL API Anda
-const API_URL = 'https://ekotaqwa.bangkoding.my.id/api' // Asumsi prefix /refleksi
+interface KuisResponse {
+    success: boolean;
+    data: KuisData;
+    message?: string;
+    code?: number;
+    timestamp?: string;
+}
 
 export function useKuisData() {
     const [data, setData] = useState<KuisData | null>(null)
@@ -31,13 +37,9 @@ export function useKuisData() {
                 setLoading(true)
             }
 
-            const res = await fetch(`${API_URL}/v1/refleksi/kuis`)
-            const responseData = await res.json()
+            const responseData = await apiGet('/v1/refleksi/kuis') as KuisResponse['data']
 
-            if (responseData?.success) {
-                // Data dari controller ada di dalam 'data'
-                setData(responseData.data)
-            }
+            setData(responseData)
         } catch (err) {
             console.error('Failed to fetch kuis data:', err)
         } finally {

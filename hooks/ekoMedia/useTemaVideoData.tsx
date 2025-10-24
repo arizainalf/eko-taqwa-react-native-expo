@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiGet } from 'utils/api';
 
 export interface JenisTemaItem {
     id: string;
@@ -35,23 +36,11 @@ export interface ApiResponse {
 // Real API function
 const fetchTemaData = async (jenisTemaId: string): Promise<ApiResponse['data']> => {
     try {
-        const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-        const response = await fetch(`${API_BASE_URL}/v1/media/jenis_tema/${jenisTemaId}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const result = await apiGet(`/v1/media/jenis_tema/${jenisTemaId}`);
 
-        const result: ApiResponse = await response.json();
+        return result as ApiResponse['data'];
 
-        if (!result.success) {
-            throw new Error(result.message || 'Gagal memuat data Tema');
-        }
-
-        return result.data;
     } catch (error) {
         console.error('Error fetching Tema data:', error);
         throw error;

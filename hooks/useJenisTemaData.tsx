@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiGet } from 'utils/api';
 
 // Types berdasarkan response API
 export interface JenisTemaItem {
@@ -24,23 +25,10 @@ export interface ApiResponse {
 // Real API function
 const fetchJenisTemaData = async (): Promise<ApiResponse['data']> => {
     try {
-        const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-        const response = await fetch(`${API_BASE_URL}/v1/jenis_tema`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        });
+        const result = await apiGet(`/v1/jenis_tema`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        return result as ApiResponse['data'];
 
-        const result: ApiResponse = await response.json();
-
-        if (!result.success) {
-            throw new Error(result.message || 'Gagal memuat data Jenis Tema');
-        }
-
-        return result.data;
     } catch (error) {
         console.error('Error fetching Jenis Tema data:', error);
         throw error;

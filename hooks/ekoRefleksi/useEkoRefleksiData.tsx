@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiGet } from 'utils/api';
 
 // Types berdasarkan response API
 export interface RefleksiEko {
@@ -18,23 +19,10 @@ export interface ApiResponse {
 // Real API function
 const fetchEkoRefleksiData = async (): Promise<ApiResponse['data']> => {
     try {
-        const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-        const response = await fetch(`${API_BASE_URL}/v1/refleksi`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        });
+        const result = await apiGet(`/v1/refleksi`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        return result as ApiResponse['data'];
 
-        const result: ApiResponse = await response.json();
-
-        if (!result.success) {
-            throw new Error(result.message || 'Gagal memuat data Eko Refleksi');
-        }
-
-        return result.data;
     } catch (error) {
         console.error('Error fetching Eko Refleksi data:', error);
         throw error;

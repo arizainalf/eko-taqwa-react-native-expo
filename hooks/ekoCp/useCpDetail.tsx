@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { apiGet } from 'utils/api';
 
 // --- Interface ---
 // 1. Definisikan interface untuk OBJEK detail di dalam "data"
@@ -31,24 +32,10 @@ export interface ApiResponse {
 // Fungsi API yang mengambil data
 const fetchCpDetail = async (cpId: string): Promise<CpDetail> => {
     try {
-        // Ganti URL ini dengan endpoint API Anda yang sebenarnya
-        const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-        const response = await fetch(`${API_BASE_URL}/v1/cp/${cpId}`, { // <-- Asumsi endpoint
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        });
+        const result = await apiGet(`/v1/cp/${cpId}`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        return result as ApiResponse['data'];
 
-        const result: ApiResponse = await response.json();
-
-        if (!result.success) {
-            throw new Error(result.message || 'Gagal memuat detail CP');
-        }
-
-        return result.data;
     } catch (error) {
         console.error('Error fetching CP detail:', error);
         throw error;

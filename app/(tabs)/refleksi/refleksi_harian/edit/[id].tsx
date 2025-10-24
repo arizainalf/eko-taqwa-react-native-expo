@@ -18,6 +18,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useDevice } from 'context/deviceContext'
+import { STORAGE_BASE_URL } from 'utils/api'
 
 export default function EditRefleksiPage() {
     const [tanggal, setTanggal] = useState(new Date())
@@ -102,7 +103,7 @@ export default function EditRefleksiPage() {
                     setDeskripsi(refleksi.deskripsi || '')
 
                     const fullImageUrl = refleksi.gambar ?
-                        (refleksi.gambar.startsWith('http') ? refleksi.gambar : `https://ekotaqwa.bangkoding.my.id/storage/${refleksi.gambar}`)
+                        (refleksi.gambar.startsWith('http') ? refleksi.gambar : `${STORAGE_BASE_URL}${refleksi.gambar}`)
                         : null
 
                     setImageUri(fullImageUrl)

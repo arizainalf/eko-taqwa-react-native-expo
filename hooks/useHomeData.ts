@@ -1,7 +1,6 @@
-// hooks/useHomeData.ts
 import { useState, useEffect } from 'react';
+import { apiGet } from 'utils/api';
 
-// Types berdasarkan response API
 export interface Stats {
   total_tema: number;
   total_kuis: number;
@@ -18,24 +17,6 @@ export interface Stats {
     created_at: string;
     updated_at: string;
   };
-}
-
-export interface JenisTema {
-  id: string;
-  nama: string;
-  deskripsi: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Video {
-  id: string;
-  tema_id: string;
-  judul: string;
-  deskripsi: string;
-  link: string;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface ActiveKuis {
@@ -55,45 +36,6 @@ export interface HomeData {
   device: any;
 }
 
-export interface ApiResponse {
-  success: boolean;
-  code: number;
-  message: string;
-  data: HomeData;
-  timestamp: string;
-}
-
-// Real API function
-const fetchHomeData = async (): Promise<HomeData> => {
-  try {
-    // Ganti dengan URL API Anda
-    const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-
-    const response = await fetch(`${API_BASE_URL}/v1/home`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // Tambahkan headers lain jika diperlukan (Authorization, dll)
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result: ApiResponse = await response.json();
-
-    if (!result.success) {
-      throw new Error(result.message || 'Failed to fetch home data');
-    }
-
-    return result.data;
-  } catch (error) {
-    console.error('Error fetching home data:', error);
-    throw error;
-  }
-};
-
 export const useHomeData = () => {
   const [data, setData] = useState<HomeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,10 +45,10 @@ export const useHomeData = () => {
     try {
       setLoading(true);
       setError(null);
-      const result = await fetchHomeData();
-      setData(result);
+      const result = await apiGet<{ data: HomeData }>('/v1/home');
+      setData(result.data || result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
     } finally {
       setLoading(false);
     }
@@ -116,10 +58,5 @@ export const useHomeData = () => {
     loadData();
   }, []);
 
-  return {
-    data,
-    loading,
-    error,
-    refetch: loadData // Untuk pull-to-refresh
-  };
+  return { data, loading, error, refetch: loadData };
 };

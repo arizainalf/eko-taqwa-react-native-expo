@@ -1,6 +1,6 @@
 // hooks/usePostsData.ts
 import { useState, useEffect, useCallback } from 'react'
-
+import { apiGet, apiDelete, STORAGE_BASE_URL } from 'utils/api' // Import utils API
 
 export interface Device {
     id: string
@@ -24,22 +24,14 @@ export interface ApiResponse {
     success: boolean;
     code: number;
     message: string;
-    data: {
-        'refleksi': Post;
-        'device': Device;
-    };
+    data: Post[]; // Diubah karena response /v1/refleksi/harian mengembalikan array
     timestamp: string;
 }
-
-const STORAGE_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/storage/'
 
 export function usePostsData(currentDeviceId: string) {
     const [posts, setPosts] = useState<Post[]>([])
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
-
-    const API_URL = 'https://ekotaqwa.bangkoding.my.id/api'
-
 
     const fetchPosts = useCallback(async (isRefreshing = false) => {
         try {
@@ -49,12 +41,12 @@ export function usePostsData(currentDeviceId: string) {
                 setLoading(true)
             }
 
-            const res = await fetch(`${API_URL}/v1/refleksi/harian`)
-            const data = await res.json()
+            // Gunakan apiGet dari utils
+            const data = await apiGet('/v1/refleksi/harian') as ApiResponse['data']
 
-            if (data?.success) {
+            if (data) {
                 // 1. Urutkan posts
-                const sortedPosts: Post[] = data.data.sort((a: Post, b: Post) => {
+                const sortedPosts: Post[] = data.sort((a: Post, b: Post) => {
                     if (a.device_id === currentDeviceId && b.device_id !== currentDeviceId) {
                         return -1
                     }
@@ -64,19 +56,16 @@ export function usePostsData(currentDeviceId: string) {
                     return new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime()
                 })
 
-                // === 2. MODIFIKASI: Ubah path gambar menjadi URL lengkap ===
+                // 2. Ubah path gambar menjadi URL lengkap
                 const postsWithFullImageUrls = sortedPosts.map(post => {
-                    // Cek jika 'gambar' ada dan tidak null/kosong
                     if (post.gambar) {
                         return {
                             ...post,
-                            // Gabungkan base URL storage dengan path gambar dari API
                             gambar: `${STORAGE_BASE_URL}${post.gambar}`
                         }
                     }
-                    return post // Kembalikan post apa adanya jika tidak ada gambar
+                    return post
                 })
-                // === Selesai Modifikasi ===
 
                 // 3. Simpan data yang sudah dimodifikasi ke state
                 setPosts(postsWithFullImageUrls)
@@ -91,16 +80,8 @@ export function usePostsData(currentDeviceId: string) {
 
     const deletePost = async (id: string) => {
         try {
-            await fetch(`${API_URL}/v1/refleksi/harian/${id}`,
-                {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                }
-            )
-
+            // Gunakan apiDelete dari utils
+            await apiDelete(`/v1/refleksi/harian/${id}`)
         } catch (error) {
             console.error('Gagal menghapus:', error)
             throw error

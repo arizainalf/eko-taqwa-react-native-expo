@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiGet } from 'utils/api';
 
 // Types berdasarkan response API
 export interface CpItem {
@@ -27,23 +28,11 @@ export interface ApiResponse {
 // Real API function
 const fetchCpData = async (faseId: string, mapelId: string, metode: string): Promise<ApiResponse['data']> => {
     try {
-        const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-        const response = await fetch(`${API_BASE_URL}/v1/fase/${faseId}/mapel/${mapelId}/metode/${metode}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const result = await apiGet(`/v1/fase/${faseId}/mapel/${mapelId}/metode/${metode}`);
 
-        const result: ApiResponse = await response.json();
+        return result as ApiResponse['data'];
 
-        if (!result.success) {
-            throw new Error(result.message || 'Gagal memuat data Metode');
-        }
-
-        return result.data;
     } catch (error) {
         console.error('Error fetching Metode data:', error);
         throw error;
