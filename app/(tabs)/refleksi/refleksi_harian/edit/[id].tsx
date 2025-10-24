@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
     View,
     Text,
@@ -15,21 +15,26 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as ImagePicker from 'expo-image-picker'
-import { useRouter } from 'expo-router'
+import { useRouter, useLocalSearchParams } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useDevice } from 'context/deviceContext'
 
-export default function CreateRefleksiPage() {
+export default function EditRefleksiPage() {
     const [tanggal, setTanggal] = useState(new Date())
     const [showDatePicker, setShowDatePicker] = useState(false)
-
     const [judul, setJudul] = useState('')
     const [deskripsi, setDeskripsi] = useState('')
     const [imageUri, setImageUri] = useState<string | null>(null)
+    const [originalImageUri, setOriginalImageUri] = useState<string | null>(null)
+    const [imageAction, setImageAction] = useState<'keep' | 'update' | 'remove'>('keep')
     const [loading, setLoading] = useState(false)
-    const router = useRouter()
+    const [loadingData, setLoadingData] = useState(true)
 
+    const router = useRouter()
+    const { id } = useLocalSearchParams()
     const { deviceId } = useDevice()
+
+    const API_URL = `https://ekotaqwa.bangkoding.my.id/api/v1/refleksi/harian/${id}`
 
     // Generate data untuk date picker
     const days = Array.from({ length: 31 }, (_, i) => i + 1)
@@ -48,7 +53,7 @@ export default function CreateRefleksiPage() {
         { name: 'Desember', value: 11 }
     ]
     const currentYear = new Date().getFullYear()
-    const years = Array.from({ length: 10 }, (_, i) => currentYear - i + 5) // 5 tahun ke belakang, 5 tahun ke depan
+    const years = Array.from({ length: 10 }, (_, i) => currentYear - i + 5)
 
     const formatTanggal = (date: Date) => {
         return date.toLocaleDateString('id-ID', {
@@ -76,20 +81,60 @@ export default function CreateRefleksiPage() {
     }
 
     const showPicker = () => {
-        console.log('Show picker pressed')
         setShowDatePicker(true)
     }
 
     const confirmDate = () => {
-        console.log('Date confirmed:', tanggal)
         setShowDatePicker(false)
     }
 
-    // 2. Fungsi untuk memilih gambar dari galeri
+    // 🔹 Load data lama
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch(API_URL)
+                const data = await res.json()
+
+
+                if (res.ok && data.success && data.data) {
+                    const refleksi = data.data
+                    setJudul(refleksi.judul || '')
+                    setDeskripsi(refleksi.deskripsi || '')
+
+                    const fullImageUrl = refleksi.gambar ?
+                        (refleksi.gambar.startsWith('http') ? refleksi.gambar : `https://ekotaqwa.bangkoding.my.id/storage/${refleksi.gambar}`)
+                        : null
+
+                    setImageUri(fullImageUrl)
+                    setOriginalImageUri(fullImageUrl)
+                    setImageAction('keep')
+
+
+                    // Set tanggal dari data API
+                    if (refleksi.tanggal) {
+                        const apiDate = new Date(refleksi.tanggal)
+                        setTanggal(apiDate)
+                    }
+                } else {
+                    Alert.alert('Gagal', 'Tidak dapat memuat data refleksi.')
+                    router.back()
+                }
+            } catch (error) {
+                Alert.alert('Error', 'Gagal memuat data refleksi.')
+                router.back()
+            } finally {
+                setLoadingData(false)
+            }
+        }
+
+        fetchData()
+    }, [id])
+
+    // 🔹 Pilih gambar
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
         if (status !== 'granted') {
-            Alert.alert('Izin Ditolak', 'Maaf, kami memerlukan izin galeri untuk memilih gambar.')
+            Alert.alert('Izin Ditolak', 'Kami memerlukan izin untuk mengakses galeri.')
             return
         }
 
@@ -100,106 +145,121 @@ export default function CreateRefleksiPage() {
             quality: 0.7,
         })
 
-        if (!result.canceled && result.assets && result.assets.length > 0) {
+        if (!result.canceled && result.assets.length > 0) {
             setImageUri(result.assets[0].uri)
+            setImageAction('update')
         }
     }
 
-    // 3. Fungsi untuk mengirim data ke API
-    const handleSubmit = async () => {
-        // Validasi input
-        if (!judul || !deskripsi) {
+    // 🔹 Hapus gambar
+    const removeImage = () => {
+        setImageUri(null)
+        setImageAction('remove')
+    }
+
+    // 🔹 Simpan perubahan - FIX BOOLEAN VALIDATION ERROR
+    const handleUpdate = async () => {
+        if (!judul) {
             Alert.alert('Form Belum Lengkap', 'Judul dan deskripsi wajib diisi.')
             return
         }
+
         if (!deviceId) {
-            Alert.alert('Error', 'Device ID tidak ditemukan. Coba muat ulang halaman.')
+            Alert.alert('Error', 'Device ID tidak ditemukan.')
             return
         }
 
         setLoading(true)
-        const formData = new FormData()
 
-        // HANYA MENAMBAHKAN DATA YANG DIINPUT USER
+        const formData = new FormData()
         formData.append('judul', judul)
         formData.append('deskripsi', deskripsi)
-        formData.append('device_id', deviceId)
-
-        // TANGGAL DARI INPUT USER (bukan otomatis)
         formData.append('tanggal', formatTanggalForAPI(tanggal))
-
-        if (imageUri) {
-            const uriParts = imageUri.split('.')
-            const fileType = uriParts[uriParts.length - 1]
-            const fileToUpload = {
-                uri: Platform.OS === 'android' ? imageUri : imageUri.replace('file://', ''),
-                name: `photo_${Date.now()}.${fileType}`,
-                type: `image/${fileType}`,
-            }
-            formData.append('gambar', fileToUpload as any)
-        }
-
-        // Debug: log data yang akan dikirim
-        console.log('Data yang dikirim:')
-        console.log('Judul:', judul)
-        console.log('Deskripsi:', deskripsi)
-        console.log('Device ID:', deviceId)
-        console.log('Tanggal:', formatTanggalForAPI(tanggal))
-        console.log('Gambar:', imageUri ? 'Ada' : 'Tidak ada')
+        formData.append('_method', 'PUT')
 
         try {
-            const response = await fetch('https://ekotaqwa.bangkoding.my.id/api/v1/refleksi/harian', {
+            // 1. Handle penghapusan gambar - kirim hapus_gambar sebagai boolean
+            if (imageAction === 'remove' && originalImageUri) {
+                // Kirim sebagai boolean (1/0) bukan string
+                formData.append('hapus_gambar', '1') // Laravel akan convert '1' ke boolean true
+            }
+
+            // 2. Handle upload gambar baru
+            if (imageAction === 'update' && imageUri && !imageUri.startsWith('http')) {
+                const uriParts = imageUri.split('.')
+                const fileType = uriParts[uriParts.length - 1]
+
+                formData.append('gambar', {
+                    uri: Platform.OS === 'android' ? imageUri : imageUri.replace('file://', ''),
+                    name: `photo_${Date.now()}.${fileType}`,
+                    type: `image/${fileType}`,
+                } as any)
+            }
+
+            const response = await fetch(API_URL, {
                 method: 'POST',
-                body: formData,
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'accept': 'application/json'
+                    'accept': 'application/json',
                 },
+                body: formData,
             })
+
 
             const data = await response.json()
 
             if (response.ok && data.success) {
-                Alert.alert('Sukses', 'Refleksi harian berhasil ditambahkan.')
+                Alert.alert('Sukses', 'Refleksi berhasil diperbarui.')
                 router.back()
             } else {
-                console.error('API Error:', data)
-                Alert.alert('Gagal', data.message || 'Terjadi kesalahan saat menyimpan data.')
+                if (data.errors) {
+                    const errorMessages = Object.values(data.errors).flat().join('\n')
+                    Alert.alert('Validasi Gagal', errorMessages)
+                } else {
+                    Alert.alert('Gagal', data.message || 'Terjadi kesalahan saat update.')
+                }
             }
-        } catch (err) {
-            console.error('Network Error:', err)
-            Alert.alert('Error', 'Terjadi kesalahan jaringan. Periksa koneksi Anda.')
+        } catch (err: any) {
+            if (err.message?.includes('Network request failed')) {
+                Alert.alert(
+                    'Koneksi Gagal',
+                    'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.'
+                )
+            } else {
+                Alert.alert('Error', 'Gagal memperbarui data: ' + (err.message || 'Unknown error'))
+            }
         } finally {
             setLoading(false)
         }
+    }
+
+    // 🔹 Loading awal data
+    if (loadingData) {
+        return (
+            <View className="flex-1 justify-center items-center bg-gray-50">
+                <ActivityIndicator size="large" color="#059669" />
+                <Text className="text-gray-600 mt-2">Memuat data refleksi...</Text>
+            </View>
+        )
     }
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
             <StatusBar style="dark" />
             <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 40 }}>
-                {/* Header */}
                 <View className="h-96 pb-12 pt-6 px-4 bg-green-600 rounded-b-xl">
                     <View className="flex-row items-center mt-5">
-                        <Pressable
-                            onPress={() => router.back()}
-                            className="mr-4 px-1 -ml-1"
-                        >
+                        <Pressable onPress={() => router.back()} className="mr-4 px-1 -ml-1">
                             <Ionicons name="arrow-back" size={28} color="white" />
                         </Pressable>
                         <View>
-                            <Text className="text-2xl font-bold text-white mb-1">
-                                Refleksi Harian
-                            </Text>
-                            <Text className="text-base text-green-100">
-                                Lihat semua refleksi harian terbaru
-                            </Text>
+                            <Text className="text-2xl font-bold text-white mb-1">Edit Refleksi</Text>
+                            <Text className="text-base text-green-100">Perbarui refleksi harian Anda</Text>
                         </View>
                     </View>
                 </View>
 
-                {/* Card Form */}
-                <View className='bg-white -mt-64 mx-3 rounded-md'>
+                <View className="bg-white -mt-64 mx-3 rounded-md">
 
                     {/* Input Tanggal */}
                     <View className='px-4 pt-4'>
@@ -216,23 +276,23 @@ export default function CreateRefleksiPage() {
                     </View>
 
                     {/* Input Judul */}
-                    <View className='px-4'>
+                    <View className="px-4">
                         <Text className="text-base font-semibold text-gray-700 mb-2">Judul Refleksi</Text>
                         <TextInput
                             className="bg-white border border-gray-300 rounded-lg p-3 text-base mb-4"
-                            placeholder="Masukkan judul refleksi Anda"
+                            placeholder="Judul refleksi Anda"
                             value={judul}
-                            multiline
                             onChangeText={setJudul}
+                            multiline
                         />
                     </View>
 
                     {/* Input Deskripsi */}
-                    <View className='px-4'>
+                    <View className="px-4">
                         <Text className="text-base font-semibold text-gray-700 mb-2">Deskripsi Refleksi</Text>
                         <TextInput
                             className="bg-white border border-gray-300 rounded-lg p-3 text-base mb-4 h-72"
-                            placeholder="Tuliskan deskripsi refleksi harian Anda..."
+                            placeholder="Tuliskan deskripsi refleksi..."
                             value={deskripsi}
                             onChangeText={setDeskripsi}
                             multiline
@@ -240,8 +300,10 @@ export default function CreateRefleksiPage() {
                         />
                     </View>
 
-                    {/* Input Gambar */}
-                    <View className='px-4 pt-2 mb-8'>
+                    {/* Pilih / Preview Gambar */}
+                    <View className="px-4 pt-2 mb-8">
+                        <Text className="text-base font-semibold text-gray-700 mb-2">Gambar Refleksi</Text>
+
                         <TouchableOpacity
                             onPress={pickImage}
                             className="bg-blue-100 border border-blue-300 rounded-lg p-4 items-center justify-center mb-4"
@@ -251,25 +313,47 @@ export default function CreateRefleksiPage() {
                             </Text>
                         </TouchableOpacity>
 
+                        {/* Tampilkan gambar yang aktif */}
                         {imageUri && (
-                            <View className="mb-2 items-center">
+                            <View className="mb-4 items-center">
                                 <Image
                                     source={{ uri: imageUri }}
                                     className="w-full aspect-[4/3] rounded-lg"
                                     resizeMode="cover"
                                 />
                                 <TouchableOpacity
-                                    onPress={() => setImageUri(null)}
-                                    className="m-4 flex-row items-center"
+                                    onPress={removeImage}
+                                    className="mt-3 flex-row items-center bg-red-50 px-4 py-2 rounded-lg border border-red-200"
                                 >
-                                    <Ionicons name="trash-outline" size={20} color="red" />
-                                    <Text className="text-red-600 ml-2">Hapus Gambar</Text>
+                                    <Ionicons name="trash-outline" size={18} color="red" />
+                                    <Text className="text-red-600 ml-2 font-medium">
+                                        Hapus Gambar
+                                    </Text>
                                 </TouchableOpacity>
+
+                                {imageUri.startsWith('http') ? (
+                                    <Text className="text-gray-500 text-sm mt-2 text-center">
+                                        Gambar saat ini
+                                    </Text>
+                                ) : (
+                                    <Text className="text-green-600 text-sm mt-2 text-center">
+                                        Gambar baru yang akan diupload
+                                    </Text>
+                                )}
                             </View>
                         )}
 
+                        {!imageUri && originalImageUri && (
+                            <View className="mb-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <Text className="text-yellow-700 text-sm text-center">
+                                    Gambar akan dihapus dari server ketika disimpan
+                                </Text>
+                            </View>
+                        )}
+
+                        {/* Tombol Simpan */}
                         <TouchableOpacity
-                            onPress={handleSubmit}
+                            onPress={handleUpdate}
                             disabled={loading}
                             className={`rounded-lg p-4 items-center justify-center ${loading ? 'bg-gray-400' : 'bg-green-600'
                                 }`}
@@ -277,7 +361,7 @@ export default function CreateRefleksiPage() {
                             {loading ? (
                                 <ActivityIndicator color="#fff" />
                             ) : (
-                                <Text className="text-white text-lg font-bold">Simpan Refleksi</Text>
+                                <Text className="text-white text-lg font-bold">Perbarui Refleksi</Text>
                             )}
                         </TouchableOpacity>
                     </View>

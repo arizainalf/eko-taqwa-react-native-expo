@@ -33,7 +33,7 @@ const fetchCpDetail = async (cpId: string): Promise<CpDetail> => {
     try {
         // Ganti URL ini dengan endpoint API Anda yang sebenarnya
         const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-        const response = await fetch(`${API_BASE_URL}/cp/${cpId}`, { // <-- Asumsi endpoint
+        const response = await fetch(`${API_BASE_URL}/v1/cp/${cpId}`, { // <-- Asumsi endpoint
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });

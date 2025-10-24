@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useCallback, useRef } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
 import {
     View,
     Text,
@@ -9,7 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useDevice } from 'context/deviceContext'
-import { useKuisDetailData } from 'hooks/useKuisDetailData'
+import { useKuisDetailData } from 'hooks/ekoRefleksi/useKuisDetailData'
 
 export default function KuisDetailScreen() {
     const router = useRouter()
@@ -22,7 +23,23 @@ export default function KuisDetailScreen() {
     const { deviceId } = useDevice()
 
     // 3. Fetch data menggunakan hook
-    const { data, loading } = useKuisDetailData(kuisId ?? '', deviceId ?? '')
+    const { data, loading, refetch } = useKuisDetailData(kuisId ?? '', deviceId ?? '')
+
+    const hasRefetched = useRef(false)
+
+    useFocusEffect(
+        useCallback(() => {
+            if (!hasRefetched.current) {
+                hasRefetched.current = true
+                refetch()
+            }
+
+            return () => {
+                hasRefetched.current = false
+            }
+        }, [])
+    )
+
 
     // Tampilkan loading spinner
     if (loading) {
@@ -52,7 +69,7 @@ export default function KuisDetailScreen() {
     // 4. Tentukan status kuis
     const kuis = data.kuis
     const isDone = data.diselesaikan > 0
-    const lastResult = isDone ? data.hasil_kuis[0] : null // Ambil hasil terakhir
+    const lastResult = isDone ? data.hasil_kuis : null // Ambil hasil terakhir
 
     // 5. Fungsi untuk navigasi ke halaman pengerjaan kuis
     // (Anda perlu membuat halaman ini, cth: /kuis/play/[id].tsx)

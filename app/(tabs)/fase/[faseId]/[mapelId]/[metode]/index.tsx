@@ -1,10 +1,11 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams } from 'expo-router'
-import { useCpByMetode } from 'hooks/useCpByMetode'
+import { useCpByMetode } from 'hooks/ekoCp/useCpByMetode'
 import LoadingScreen from 'components/LoadingScreen'
 import { useRouter } from 'expo-router'
 import ItemCard from 'components/ItemCard'
+import { ucfirst } from '..'
 
 export default function CpList() {
     const router = useRouter()
@@ -66,7 +67,7 @@ export default function CpList() {
                             Capaian Pembelajaran
                         </Text>
                         <Text className="text-base text-green-100">
-                            Daftar capaian pembelajaran
+                            Di {ucfirst(data!.metode)}
                         </Text>
                     </View>
 
@@ -75,7 +76,7 @@ export default function CpList() {
 
             <View className="p-5 mx-3 bg-white -mt-64 rounded-2xl min-h-[200px]">
 
-                {data?.map((cp: any) => (
+                {data?.cp.map((cp: any) => (
                     <ItemCard
                         key={cp.id}
                         title={cp.nama}
@@ -84,7 +85,7 @@ export default function CpList() {
                     />
                 ))}
 
-                {data?.length === 0 && (
+                {data?.cp.length === 0 && (
                     <View className="items-center py-10 px-5">
                         <Ionicons name="document-text" size={64} color="#6B7280" />
                         <Text className="text-lg font-bold text-gray-900 mt-4 mb-2">

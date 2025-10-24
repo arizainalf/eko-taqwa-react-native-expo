@@ -1,6 +1,6 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
-import { useDalilData } from 'hooks/useDalilData' // Menggunakan hook Dalil
+import { useDalilData } from 'hooks/ekoAyatHadist/useDalilData' // Menggunakan hook Dalil
 import LoadingScreen from 'components/LoadingScreen'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 

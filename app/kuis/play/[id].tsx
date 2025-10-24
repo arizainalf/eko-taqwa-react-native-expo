@@ -10,7 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useDevice } from 'context/deviceContext'
-import { useKuisEngine } from 'hooks/useKuisEngine'
+import { useKuisEngine } from 'hooks/ekoRefleksi/useKuisEngine'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function KuisPlayScreen() {
@@ -63,7 +63,7 @@ export default function KuisPlayScreen() {
                         </Pressable>
                     </View>
                 )}
-            </SafeAreaView>
+        </SafeAreaView>
         )
     }
 

@@ -1,6 +1,6 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useMediaData } from 'hooks/useMediaData'
+import { useMediaData } from 'hooks/ekoMedia/useMediaData'
 import LoadingScreen from 'components/LoadingScreen'
 import ItemCard from 'components/ItemCard'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -81,7 +81,7 @@ export default function MediaList() {
                         key={media.id}
                         title={media.judul}
                         value={`${media.deskripsi}`}
-                        href={`/media/[jenisTemaId]/[temaId]/${media.id}`}
+                        href={`/media/${jenisTemaId}/${temaId}/${media.id}`}
                     />
                 ))}
 

@@ -20,8 +20,17 @@ export type Post = {
     updated_at: Date
 }
 
-// === TAMBAHKAN BASE URL UNTUK STORAGE ===
-// Asumsi Anda sudah menjalankan `php artisan storage:link` di backend Laravel
+export interface ApiResponse {
+    success: boolean;
+    code: number;
+    message: string;
+    data: {
+        'refleksi': Post;
+        'device': Device;
+    };
+    timestamp: string;
+}
+
 const STORAGE_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/storage/'
 
 export function usePostsData(currentDeviceId: string) {
@@ -29,7 +38,8 @@ export function usePostsData(currentDeviceId: string) {
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
 
-    const API_URL = 'https://ekotaqwa.bangkoding.my.id/api/refleksi_harian'
+    const API_URL = 'https://ekotaqwa.bangkoding.my.id/api'
+
 
     const fetchPosts = useCallback(async (isRefreshing = false) => {
         try {
@@ -39,7 +49,7 @@ export function usePostsData(currentDeviceId: string) {
                 setLoading(true)
             }
 
-            const res = await fetch(API_URL)
+            const res = await fetch(`${API_URL}/v1/refleksi/harian`)
             const data = await res.json()
 
             if (data?.success) {
@@ -79,6 +89,24 @@ export function usePostsData(currentDeviceId: string) {
         }
     }, [currentDeviceId])
 
+    const deletePost = async (id: string) => {
+        try {
+            await fetch(`${API_URL}/v1/refleksi/harian/${id}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                }
+            )
+
+        } catch (error) {
+            console.error('Gagal menghapus:', error)
+            throw error
+        }
+    }
+
     const onRefresh = useCallback(() => {
         fetchPosts(true)
     }, [fetchPosts])
@@ -87,5 +115,5 @@ export function usePostsData(currentDeviceId: string) {
         fetchPosts()
     }, [fetchPosts])
 
-    return { posts, loading, refreshing, fetchPosts, onRefresh }
+    return { posts, loading, refreshing, fetchPosts, onRefresh, deletePost }
 }

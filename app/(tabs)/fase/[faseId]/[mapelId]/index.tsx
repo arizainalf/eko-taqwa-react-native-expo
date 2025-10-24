@@ -1,12 +1,12 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams } from 'expo-router'
-import { useMetodeData } from 'hooks/useMetodeData'
+import { useMetodeData } from 'hooks/ekoCp/useMetodeData'
 import LoadingScreen from 'components/LoadingScreen'
 import { useRouter } from 'expo-router'
 import ItemCard from 'components/ItemCard'
 
-function ucfirst(str: string) {
+export function ucfirst(str: string) {
   if (!str) return str; // Jaga-jaga jika string-nya kosong
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -71,7 +71,7 @@ export default function MetodeList() {
               Metode Pembelajaran
             </Text>
             <Text className="text-base text-green-100">
-              Daftar metode pembelajaran
+              {data?.mapel.nama}
             </Text>
           </View>
 

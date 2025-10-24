@@ -42,7 +42,7 @@ export function useKuisEngine(kuisId: string, deviceId: string) {
         setLoading(true)
         try {
             // Route: /kuis/{id}/pertanyaan?offset=...
-            const res = await fetch(`${API_BASE_URL}/kuis/${kuisId}/pertanyaan?offset=${offset}`)
+            const res = await fetch(`${API_BASE_URL}/v1/refleksi/kuis/${kuisId}/pertanyaan?offset=${offset}`)
             const data = await res.json()
             if (data.success) {
                 setQuestionData(data.data)
@@ -75,7 +75,7 @@ export function useKuisEngine(kuisId: string, deviceId: string) {
 
         try {
             // Route: POST /kuis
-            const res = await fetch(`${API_BASE_URL}/kuis`, {
+            const res = await fetch(`${API_BASE_URL}/v1/refleksi/kuis`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

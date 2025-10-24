@@ -11,7 +11,7 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-import { useKuisData, KuisItem } from 'hooks/useKuisData' // <-- Gunakan hook baru
+import { useKuisData, KuisItem } from 'hooks/ekoRefleksi/useKuisData' // <-- Gunakan hook baru
 
 export default function KuisScreen() {
     const router = useRouter()

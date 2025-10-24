@@ -25,7 +25,7 @@ export interface ApiResponse {
 const fetchJenisTemaData = async (): Promise<ApiResponse['data']> => {
     try {
         const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-        const response = await fetch(`${API_BASE_URL}/jenis_tema`, {
+        const response = await fetch(`${API_BASE_URL}/v1/jenis_tema`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });

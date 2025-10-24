@@ -7,12 +7,8 @@ export interface Stats {
   total_kuis: number;
   total_video: number;
   total_cp: number;
+  total_ayat_hadist: number;
   total_kaidah: number;
-  total_refleksi: number;
-  total_ayat: number;
-  total_hadist: number;
-  total_kitab: number;
-  kuis_selesai: number;
   random_video?: {
     id: string;
     tema_id: string;
@@ -22,7 +18,6 @@ export interface Stats {
     created_at: string;
     updated_at: string;
   };
-  device: any;
 }
 
 export interface JenisTema {
@@ -43,17 +38,6 @@ export interface Video {
   updated_at: string;
 }
 
-export interface FeaturedTema {
-  id: string;
-  jenis_tema_id: string;
-  nama: string;
-  deskripsi: string;
-  created_at: string;
-  updated_at: string;
-  jenis_tema: JenisTema;
-  video: Video[];
-}
-
 export interface ActiveKuis {
   id: string;
   judul: string;
@@ -67,7 +51,6 @@ export interface ActiveKuis {
 
 export interface HomeData {
   stats: Stats;
-  featured_tema: FeaturedTema[];
   active_kuis: ActiveKuis[];
   device: any;
 }
@@ -85,8 +68,8 @@ const fetchHomeData = async (): Promise<HomeData> => {
   try {
     // Ganti dengan URL API Anda
     const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-    
-    const response = await fetch(`${API_BASE_URL}/home`, {
+
+    const response = await fetch(`${API_BASE_URL}/v1/home`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -133,9 +116,9 @@ export const useHomeData = () => {
     loadData();
   }, []);
 
-  return { 
-    data, 
-    loading, 
+  return {
+    data,
+    loading,
     error,
     refetch: loadData // Untuk pull-to-refresh
   };

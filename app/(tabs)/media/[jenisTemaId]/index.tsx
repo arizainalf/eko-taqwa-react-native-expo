@@ -1,6 +1,6 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useTemaMediaData } from 'hooks/useTemaVideoData'
+import { useTemaMediaData } from 'hooks/ekoMedia/useTemaVideoData'
 import LoadingScreen from 'components/LoadingScreen'
 import ItemCard from 'components/ItemCard'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -75,7 +75,7 @@ export default function TemaList() {
 
             <View className="p-5 mx-3 bg-white -mt-64 rounded-2xl min-h-[200px]">
 
-                <InfoCardFull title={'Total Video'} value={data!.video_count} icon={'youtube'} />
+                <InfoCardFull title={'Total Media'} value={data!.video_count} icon={'youtube'} />
 
                 <View className="h-px bg-gray-300 my-4" />
 
@@ -83,7 +83,7 @@ export default function TemaList() {
                     <ItemCard
                         key={tema.id}
                         title={tema.nama}
-                        value={`${tema.video_count}`}
+                        value={`${tema.video_count} Media`}
                         href={`/media/${jenisTemaId}/${tema.id}`}
                     />
                 ))}

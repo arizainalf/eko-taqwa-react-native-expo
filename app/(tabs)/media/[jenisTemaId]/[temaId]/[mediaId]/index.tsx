@@ -1,6 +1,6 @@
 import { View, Text, Pressable, RefreshControl, ScrollView, Linking, Alert } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useMediaDetail } from 'hooks/useMediaDetail'
+import { useMediaDetail } from 'hooks/ekoMedia/useMediaDetail'
 // import { Colors } from 'constants/Colors' // [DIHAPUS] Import ini tidak terpakai
 import LoadingScreen from 'components/LoadingScreen'
 import { useState } from 'react';

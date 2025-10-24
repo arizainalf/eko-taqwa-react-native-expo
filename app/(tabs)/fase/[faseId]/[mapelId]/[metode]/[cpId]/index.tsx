@@ -1,7 +1,7 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams } from 'expo-router'
-import { useCpDetail } from 'hooks/useCpDetail'
+import { useCpDetail } from 'hooks/ekoCp/useCpDetail'
 import LoadingScreen from 'components/LoadingScreen'
 import { useRouter } from 'expo-router'
 

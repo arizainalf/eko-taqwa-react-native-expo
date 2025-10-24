@@ -1,6 +1,6 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useTemaKaidahData } from 'hooks/useTemaKaidahData'
+import { useTemaKaidahData } from 'hooks/ekoKaidah/useTemaKaidahData'
 import LoadingScreen from 'components/LoadingScreen'
 import ItemCard from 'components/ItemCard'
 import { useLocalSearchParams, useRouter } from 'expo-router'

@@ -1,9 +1,23 @@
 import { useState, useEffect } from 'react';
 
 // Types berdasarkan response API
-export interface MetodeItem {
-    metode_pembelajaran: string;
-    total: number;
+export interface TemaItem {
+    id: string;
+    nama: string;
+    deskripsi?: string;
+    created_at: string;
+    updated_at: string;
+}
+export interface DalilItem {
+    id: string;
+    tema_id: string;
+    jenis: string;
+    teks_asli: string;
+    terjemahan: string;
+    sumber?: string;
+    penjelasan?: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface ApiResponse {
@@ -11,18 +25,17 @@ export interface ApiResponse {
     code: number;
     message: string;
     data: {
-        fase_id: string;
-        mapel_id: string;
-        metode: MetodeItem[];
-    };
+        'dalil': DalilItem[];
+        'tema': TemaItem;
+    }
     timestamp: string;
 }
 
 // Real API function
-const fetchFaseData = async (faseId: string, mapelId: string): Promise<ApiResponse['data']> => {
+const fetchDalilData = async (temaId: string): Promise<ApiResponse['data']> => {
     try {
         const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-        const response = await fetch(`${API_BASE_URL}/fase/${faseId}/mapel/${mapelId}/metode`, {
+        const response = await fetch(`${API_BASE_URL}/v1/ayat_hadist/tema/${temaId}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -34,18 +47,18 @@ const fetchFaseData = async (faseId: string, mapelId: string): Promise<ApiRespon
         const result: ApiResponse = await response.json();
 
         if (!result.success) {
-            throw new Error(result.message || 'Gagal memuat data Metode');
+            throw new Error(result.message || 'Gagal memuat data Tema');
         }
 
         return result.data;
     } catch (error) {
-        console.error('Error fetching Metode data:', error);
+        console.error('Error fetching Tema data:', error);
         throw error;
     }
 };
 
 
-export const useMetodeData = (faseId: string, mapelId: string) => {
+export const useDalilData = (temaId: string) => {
     const [data, setData] = useState<ApiResponse['data'] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -54,7 +67,7 @@ export const useMetodeData = (faseId: string, mapelId: string) => {
         try {
             setLoading(true);
             setError(null);
-            const result = await fetchFaseData(faseId, mapelId);
+            const result = await fetchDalilData(temaId);
             setData(result);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');

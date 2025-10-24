@@ -1,8 +1,10 @@
 // app/(tabs)/posts/[id].tsx
-import React from 'react'
+import React, { useCallback, useEffect } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
 import {
     View,
     Text,
+    Alert,
     Image,
     ScrollView,
     Pressable,
@@ -10,15 +12,47 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter, useLocalSearchParams } from 'expo-router'
-import { usePostDetail } from 'hooks/useRefleksiHarianDetail'
+import { usePostDetail } from 'hooks/ekoRefleksi/useRefleksiHarianDetail'
 import { useDevice } from 'context/deviceContext'
 
 export default function PostDetailScreen() {
     const router = useRouter()
     const { id } = useLocalSearchParams()
-    const { post, loading } = usePostDetail(id as string)
+    const { post, loading, onRefresh, deletePost } = usePostDetail(id as string)
     const { deviceId } = useDevice()
     const currentDeviceId = deviceId
+
+    useFocusEffect(
+        useCallback(() => {
+            onRefresh()
+        }, [onRefresh])
+    )
+
+    const handleDelete = useCallback(
+        (postId: string) => {
+            Alert.alert(
+                'Hapus Refleksi',
+                'Apakah Anda yakin ingin menghapus refleksi ini?',
+                [
+                    { text: 'Batal', style: 'cancel' },
+                    {
+                        text: 'Hapus',
+                        style: 'destructive',
+                        onPress: async () => {
+                            try {
+                                await deletePost(postId)
+                                router.back()
+                            } catch (error) {
+                                Alert.alert('Gagal', 'Terjadi kesalahan saat menghapus data.')
+                            }
+                        },
+                    },
+                ],
+                { cancelable: true }
+            )
+        },
+        [deletePost, onRefresh]
+    )
 
     if (loading) {
         return (
@@ -46,7 +80,7 @@ export default function PostDetailScreen() {
         )
     }
 
-    const isMyDevice = post.device_id === currentDeviceId
+    const isMyDevice = post.device.device_id === currentDeviceId
     const formatDate = (dateString: string) => {
         const date = new Date(dateString)
         return date.toLocaleDateString('id-ID', {
@@ -74,7 +108,6 @@ export default function PostDetailScreen() {
                         </Text>
                         {isMyDevice && (
                             <View className="flex-row items-center">
-                                <Ionicons name="star" size={14} color="#BBF7D0" />
                                 <Text className="text-green-100 text-sm ml-1">
                                     Refleksi Harian Anda
                                 </Text>
@@ -90,7 +123,38 @@ export default function PostDetailScreen() {
                 contentContainerStyle={{ paddingBottom: 20 }}
             >
                 <View className="bg-white mx-4 rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    {/* Gambar */}
+                    {isMyDevice && (
+                        <View className="bg-green-500 px-3 py-1 flex-row justify-between">
+                            <View className='flex-row items-center'>
+                                <Ionicons name="star" size={14} color="white" />
+                            </View>
+                            <View className='space-x-4'>
+                                <View className="flex-row items-center justify-end space-x-4">
+                                    <Pressable
+                                        onPress={() =>
+                                            router.push(`/refleksi/refleksi_harian/edit/${post.id}`)
+                                        }
+                                        className="flex-row items-center"
+                                    >
+                                        <Ionicons name="create-outline" size={18} color="#ffff" />
+                                        <Text className="ml-1 text-white text-sm font-medium">
+                                            Edit
+                                        </Text>
+                                    </Pressable>
+
+                                    <Pressable
+                                        onPress={() => handleDelete(post.id)}
+                                        className="flex-row items-center ms-2 rounded p-2"
+                                    >
+                                        <Ionicons name="trash-outline" size={18} color="#ffff" />
+                                        <Text className="ml-1 text-white text-sm font-medium">
+                                            Hapus
+                                        </Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+                        </View>
+                    )}
                     {post.gambar && (
                         <View className='p-4'>
                             <Image
@@ -132,7 +196,7 @@ export default function PostDetailScreen() {
                                         <Ionicons name="person" size={14} color="#059669" className="mr-1" />
                                     )}
                                     <Text className={`font-medium ${isMyDevice ? 'text-green-600' : 'text-gray-700'}`}>
-                                        {isMyDevice ? 'Anda' : 'Pengguna Lain'}
+                                        {isMyDevice ? 'Anda' : post?.device.name}
                                     </Text>
                                 </View>
                             </View>

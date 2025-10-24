@@ -16,7 +16,7 @@ export type KuisData = {
 }
 
 // URL API Anda
-const API_URL = 'https://ekotaqwa.bangkoding.my.id/api/kuis' // Asumsi prefix /refleksi
+const API_URL = 'https://ekotaqwa.bangkoding.my.id/api' // Asumsi prefix /refleksi
 
 export function useKuisData() {
     const [data, setData] = useState<KuisData | null>(null)
@@ -31,7 +31,7 @@ export function useKuisData() {
                 setLoading(true)
             }
 
-            const res = await fetch(API_URL)
+            const res = await fetch(`${API_URL}/v1/refleksi/kuis`)
             const responseData = await res.json()
 
             if (responseData?.success) {

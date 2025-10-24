@@ -7,11 +7,10 @@ export default function KuisStackLayout() {
     const router = useRouter;
     return (
         <Stack screenOptions={{
-            headerShown: false, // <-- Menyembunyikan header (termasuk tombol back)
-            gestureEnabled: false, // <-- Mencegah swipe kembali di iOS
+            headerShown: false,
+            gestureEnabled: false,
         }}>
             <Stack.Screen name="index" />
-            {/* Halaman [id].tsx (detail) juga diatur di sini */}
             <Stack.Screen
                 name="[id]"
                 options={{

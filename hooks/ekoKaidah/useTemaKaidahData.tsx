@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 
-// Types berdasarkan response API
-export interface TemaItem {
+export interface JenisTemaItem {
     id: string;
     nama: string;
     deskripsi?: string;
     created_at: string;
     updated_at: string;
 }
-export interface MediaItem {
+
+export interface TemaItem {
     id: string;
-    tema_id: string;
-    judul: string;
+    nama: string;
     deskripsi?: string;
-    link: string;
+    kaidah_count: number;
     created_at: string;
     updated_at: string;
 }
@@ -23,17 +22,17 @@ export interface ApiResponse {
     code: number;
     message: string;
     data: {
-        'tema': TemaItem;
-        'media': MediaItem[];
-    }
+        'tema': TemaItem[],
+        'jenistema': JenisTemaItem,
+    };
     timestamp: string;
 }
 
 // Real API function
-const fetchMediaData = async (temaId: string): Promise<ApiResponse['data']> => {
+const fetchTemaData = async (jenisTemaId: string): Promise<ApiResponse['data']> => {
     try {
         const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-        const response = await fetch(`${API_BASE_URL}/tema/${temaId}/media`, {
+        const response = await fetch(`${API_BASE_URL}/v1/kaidah/jenis_tema/${jenisTemaId}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -56,7 +55,7 @@ const fetchMediaData = async (temaId: string): Promise<ApiResponse['data']> => {
 };
 
 
-export const useMediaData = (temaId: string) => {
+export const useTemaKaidahData = (jenisTemaId: string) => {
     const [data, setData] = useState<ApiResponse['data'] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -65,7 +64,7 @@ export const useMediaData = (temaId: string) => {
         try {
             setLoading(true);
             setError(null);
-            const result = await fetchMediaData(temaId);
+            const result = await fetchTemaData(jenisTemaId);
             setData(result);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');

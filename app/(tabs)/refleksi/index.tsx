@@ -1,6 +1,6 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useEkoRefleksiData } from 'hooks/useEkoRefleksiData'
+import { useEkoRefleksiData } from 'hooks/ekoRefleksi/useEkoRefleksiData'
 import LoadingScreen from 'components/LoadingScreen'
 import ItemCard from 'components/ItemCard'
 

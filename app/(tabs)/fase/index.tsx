@@ -1,6 +1,6 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useFaseData } from '../../../hooks/useFaseData'
+import { useFaseData } from '../../../hooks/ekoCp/useFaseData'
 import LoadingScreen from '../../../components/LoadingScreen'
 import InfoCard from 'components/InfoCard'
 import ItemCard from 'components/ItemCard'

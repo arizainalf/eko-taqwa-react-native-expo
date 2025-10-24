@@ -30,7 +30,7 @@ export type HasilKuis = {
 export type KuisDetailData = {
     kuis: Kuis
     diselesaikan: number // Cth: 0 atau 1
-    hasil_kuis: HasilKuis[] // Array dari riwayat pengerjaan
+    hasil_kuis: HasilKuis // Array dari riwayat pengerjaan
 }
 
 export function useKuisDetailData(kuisId: string, deviceId: string) {
@@ -46,7 +46,7 @@ export function useKuisDetailData(kuisId: string, deviceId: string) {
         try {
             setLoading(true)
             // Sesuai route: /kuis/{id}/device/{deviceId}
-            const res = await fetch(`${API_BASE_URL}/kuis/${kuisId}/device/${deviceId}`)
+            const res = await fetch(`${API_BASE_URL}/v1/refleksi/kuis/${kuisId}/device/${deviceId}`)
             const responseData = await res.json()
 
             if (responseData?.success) {

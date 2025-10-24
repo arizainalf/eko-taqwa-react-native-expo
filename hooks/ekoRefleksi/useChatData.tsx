@@ -5,12 +5,12 @@ export function useChatData(deviceId: string) {
     const [loading, setLoading] = useState(false)
     const [isSending, setIsSending] = useState(false)
 
-    const API_URL = 'https://ekotaqwa.bangkoding.my.id/api/tanya_jawab'
+    const API_URL = 'https://ekotaqwa.bangkoding.my.id/api'
 
     const fetchMessages = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await fetch(`${API_URL}/${deviceId}`)
+            const res = await fetch(`${API_URL}/v1/refleksi/chat/${deviceId}`)
             const data = await res.json()
 
             if (data?.success) {
@@ -48,7 +48,7 @@ export function useChatData(deviceId: string) {
 
             setMessages(prev => [...prev, userMessage])
 
-            const res = await fetch(`${API_URL}/send`, {
+            const res = await fetch(`${API_URL}/v1/refleksi/chat/send`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

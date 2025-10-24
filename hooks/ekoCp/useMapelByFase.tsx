@@ -1,17 +1,12 @@
-// hooks/useCpData.ts
 import { useState, useEffect } from 'react';
+import { FaseItem } from './useFaseData';
 
 // Types berdasarkan response API
-export interface CpItem {
+export interface MapelItem {
   id: string;
-  fase_id: string;
-  mapel_id: string;
-  deskripsi: string;
-  pendekatan: string;
-  model: string;
-  teknik: string;
-  metode: string;
-  taktik: string;
+  nama: string;
+  deskripsi?: string;
+  cp_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -20,22 +15,21 @@ export interface ApiResponse {
   success: boolean;
   code: number;
   message: string;
-  data: CpItem[];
+  data: {
+    total_cp: number;
+    mapel: MapelItem[];
+    fase: FaseItem
+  };
   timestamp: string;
 }
 
 // Real API function
-const fetchCpData = async (): Promise<CpItem[]> => {
+const fetchMapelData = async (faseId: string): Promise<ApiResponse['data']> => {
   try {
-    // Ganti dengan URL API Anda
-    const API_BASE_URL = 'https://eko-taqwa.bangkoding.my.id/api';
-    
-    const response = await fetch(`${API_BASE_URL}/ayat`, { // Sesuaikan endpoint
+    const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
+    const response = await fetch(`${API_BASE_URL}/v1/fase/${faseId}/mapel`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // Tambahkan headers lain jika diperlukan
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
 
     if (!response.ok) {
@@ -45,18 +39,19 @@ const fetchCpData = async (): Promise<CpItem[]> => {
     const result: ApiResponse = await response.json();
 
     if (!result.success) {
-      throw new Error(result.message || 'Failed to fetch Ayat data');
+      throw new Error(result.message || 'Gagal memuat data Fase');
     }
 
     return result.data;
   } catch (error) {
-    console.error('Error fetching Ayat data:', error);
+    console.error('Error fetching Fase data:', error);
     throw error;
   }
 };
 
-export const useCpData = () => {
-  const [data, setData] = useState<CpItem[] | null>(null);
+
+export const useMapelData = (faseId: string) => {
+  const [data, setData] = useState<ApiResponse['data'] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,7 +59,7 @@ export const useCpData = () => {
     try {
       setLoading(true);
       setError(null);
-      const result = await fetchCpData();
+      const result = await fetchMapelData(faseId);
       setData(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -77,10 +72,5 @@ export const useCpData = () => {
     loadData();
   }, []);
 
-  return { 
-    data, 
-    loading, 
-    error,
-    refetch: loadData
-  };
+  return { data, loading, error, refetch: loadData };
 };

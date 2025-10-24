@@ -1,7 +1,7 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams } from 'expo-router'
-import { useMapelData } from 'hooks/useMapelByFase'
+import { useMapelData } from 'hooks/ekoCp/useMapelByFase'
 import LoadingScreen from 'components/LoadingScreen'
 import { useRouter } from 'expo-router'
 import InfoCardFull from 'components/InfoCardFull'
@@ -67,7 +67,7 @@ export default function MapelList() {
               Eko CP
             </Text>
             <Text className="text-base text-green-100">
-              Daftar mata pelajaran
+              {data?.fase.nama}
             </Text>
           </View>
 

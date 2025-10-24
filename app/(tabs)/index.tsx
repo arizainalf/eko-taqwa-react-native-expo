@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { Link, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHomeData } from 'hooks/useHomeData';
 import LoadingScreen from 'components/LoadingScreen';
 import { useDevice } from 'context/deviceContext';
@@ -9,20 +9,19 @@ export function getGreeting(): string {
   const currentHour = new Date().getHours();
 
   if (currentHour >= 5 && currentHour < 10) {
-    return "Selamat Pagi"; // Jam 5 pagi - 9:59 pagi
+    return "Selamat Pagi";
   } else if (currentHour >= 10 && currentHour < 15) {
-    return "Selamat Siang"; // Jam 10 pagi - 2:59 siang
+    return "Selamat Siang";
   } else if (currentHour >= 15 && currentHour < 18) {
-    return "Selamat Sore"; // Jam 3 sore - 5:59 sore
+    return "Selamat Sore";
   } else {
-    return "Selamat Malam"; // Jam 6 sore - 4:59 pagi
+    return "Selamat Malam";
   }
 }
 
 export default function HomeScreen() {
   const { data, loading, error, refetch } = useHomeData();
   const router = useRouter();
-
   const device = useDevice();
 
   const onRefresh = async () => {
@@ -49,70 +48,94 @@ export default function HomeScreen() {
     );
   }
 
-  // Pastikan data ada sebelum destrukturisasi
-  if (!data) return null; // Atau tampilkan pesan error lain
+  if (!data) return null;
 
   const { stats, active_kuis } = data;
 
-  // Fungsi formatTime sudah bagus
   const formatTime = (minutes: number) => {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return h > 0 ? `${h}j ${m}m` : `${m}m`;
   };
 
-  // [DITAMBAH] Data untuk Quick Stats agar lebih rapi
   const quickStatsData = [
-    { icon: 'layers', label: 'Tema', value: stats.total_tema, link: '#' },
-    { icon: 'help-circle', label: 'Kuis', value: stats.total_kuis, link: 'refleksi/kuis' },
-    { icon: 'play-circle', label: 'Video', value: stats.total_video, link: '/(tabs)/media' }
+    {
+      icon: 'clipboard-check-outline' as const,
+      label: 'CP',
+      value: stats.total_cp?.toString() || '0', // ✅ Perbaiki: pastikan string
+      link: '/(tabs)/fase'
+    },
+    {
+      icon: 'play-circle' as const,
+      label: 'Media',
+      value: stats.total_video?.toString() || '0',
+      link: '/(tabs)/media'
+    },
+    {
+      icon: 'scale-balance' as const,
+      label: 'Kaidah',
+      value: stats.total_kaidah?.toString() || '0',
+      link: '/(tabs)/kaidah'
+    },
+    {
+      icon: 'abjad-arabic' as const,
+      label: 'Ayat & Hadist',
+      value: stats.total_ayat_hadist?.toString() || '0',
+      link: '/(tabs)/dalil'
+    },
+    {
+      icon: 'help-circle' as const,
+      label: 'Kuis',
+      value: stats.total_kuis?.toString() || '0',
+      link: '/refleksi/kuis'
+    },
   ];
 
   return (
     <ScrollView
-      // [DIUBAH] Background abu-abu konsisten
       className="flex-1 bg-gray-50"
       refreshControl={
         <RefreshControl
           refreshing={loading}
           onRefresh={onRefresh}
           colors={['#16A34A']}
-          tintColor="#16A34A" // [DITAMBAH]
+          tintColor="#16A34A"
         />
       }
-      contentContainerStyle={{ paddingBottom: 40 }} // [DITAMBAH]
+      contentContainerStyle={{ paddingBottom: 40 }}
     >
       {/* Header */}
-      <View className="p-6 pt-10 pb-24 bg-green-600 rounded-b-2xl"> {/* [DIUBAH] Padding disesuaikan */}
+      <View className="p-6 pt-10 pb-56 bg-green-600 rounded-b-2xl">
         <Text className="text-3xl font-bold text-white mb-1">Eko Taqwa</Text>
-        <Text className="text-green-100 text-base">{getGreeting() + ', ' + device.name}</Text>
+        <Text className="text-white text-base">{getGreeting() + ', ' + device.name}</Text>
       </View>
 
       {/* Quick Stats */}
-      {/* [DIUBAH] Layout diubah, shadow lebih tipis */}
-      <View className="flex-row justify-between px-4 -mt-20 mb-6 space-x-3">
-        {quickStatsData.map((item, i) => (
-          <Link key={item.label} href={item.link} asChild>
-            <Pressable className="flex-1 bg-white p-4 mx-1 rounded-xl items-center shadow-sm active:bg-gray-50">
-              <Ionicons name={item.icon as any} size={28} color="#16A34A" />
-              <Text className="text-green-700 font-bold text-xl mt-2">{item.value}</Text>
-              <Text className="text-gray-500 text-xs font-medium mt-1 uppercase tracking-wide">{item.label}</Text>
-            </Pressable>
-          </Link>
-        ))}
+      <View className="flex-row flex-wrap justify-between px-4 -mt-48 mb-6">
+        {quickStatsData.map((item, i) => {
+          const isLastRow = i >= 3;
+          const widthClass = isLastRow ? 'w-[48%]' : 'w-[30%]';
+
+          return (
+            <Link key={item.icon} href={item.link} asChild>
+              <Pressable className={`bg-white p-4 rounded-xl items-center shadow-md active:bg-gray-50 ${widthClass} ${i < 3 ? 'mb-4' : ''}`}>
+                <MaterialCommunityIcons name={item.icon} size={28} color="#16A34A" />
+                <Text className="text-green-700 font-bold text-xl mt-2">{item.value}</Text>
+                <Text className="text-gray-500 text-xs font-medium mt-1 uppercase tracking-wide text-center">{item.label}</Text>
+              </Pressable>
+            </Link>
+          );
+        })}
       </View>
 
       {/* Video Hari Ini */}
       {stats.random_video && (
         <View className="px-4 mb-6">
-          {/* [DITAMBAH] Judul Section */}
           <Text className="text-xl font-bold text-gray-800 mb-3 px-1">Video Hari Ini</Text>
           <Pressable
-            // [DIUBAH] Styling kartu disamakan (shadow, padding)
             className="bg-white p-4 rounded-xl shadow-sm active:bg-gray-50"
-            onPress={() => router.navigate(`/media/[jenisTemaId/[temaId]/${stats.random_video?.id}`)}
+            onPress={() => router.push(`/media/[jenisTemaId]/[temaId]/${stats.random_video?.id}`)}
           >
-            {/* [DIUBAH] Layout Teks & Tombol */}
             <View className="flex-row justify-between items-start mb-2 space-x-3">
               <View className="flex-1">
                 <Text className="text-base font-bold text-gray-900 leading-snug">
@@ -141,12 +164,12 @@ export default function HomeScreen() {
             </Link>
           </View>
 
-          {/* [DIUBAH] .map() dengan styling mirip ItemCard */}
           <View className="space-y-3">
             {active_kuis.map((kuis) => (
               <Pressable
+                key={kuis.id} // ✅ DITAMBAH: key prop
                 className="bg-white p-4 rounded-xl my-2 shadow-sm border border-gray-100 active:bg-gray-50"
-                onPress={() => router.navigate(`/refleksi/kuis/${kuis.id}`)}
+                onPress={() => router.push(`/refleksi/kuis/${kuis.id}`)} // ✅ Diperbaiki
               >
                 <View className="flex-row justify-between items-start mb-2 space-x-3">
                   <Text className="flex-1 text-lg font-bold text-gray-900">{kuis.judul}</Text>

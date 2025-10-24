@@ -1,23 +1,16 @@
 import { useState, useEffect } from 'react';
 
 // Types berdasarkan response API
-export interface TemaItem {
-    id: string;
-    nama: string;
-    deskripsi?: string;
-    created_at: string;
-    updated_at: string;
-}
-export interface DalilItem {
-    id: string;
-    tema_id: string;
-    jenis: string;
-    teks_asli: string;
-    terjemahan: string;
-    sumber?: string;
-    penjelasan?: string;
-    created_at: string;
-    updated_at: string;
+export interface CpItem {
+    id: string
+    nama: string
+    metode_pembelajaran: string;
+    deskripsi: string;
+    pendekatan?: string;
+    model?: string;
+    teknik?: string;
+    metode?: string;
+    taktik?: string;
 }
 
 export interface ApiResponse {
@@ -25,17 +18,17 @@ export interface ApiResponse {
     code: number;
     message: string;
     data: {
-        'dalil': DalilItem[];
-        'tema': TemaItem;
-    }
+        cp: CpItem[];
+        metode: string
+    };
     timestamp: string;
 }
 
 // Real API function
-const fetchDalilData = async (temaId: string): Promise<ApiResponse['data']> => {
+const fetchCpData = async (faseId: string, mapelId: string, metode: string): Promise<ApiResponse['data']> => {
     try {
         const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api';
-        const response = await fetch(`${API_BASE_URL}/tema/${temaId}/ayat_hadist`, {
+        const response = await fetch(`${API_BASE_URL}/v1/fase/${faseId}/mapel/${mapelId}/metode/${metode}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -47,18 +40,18 @@ const fetchDalilData = async (temaId: string): Promise<ApiResponse['data']> => {
         const result: ApiResponse = await response.json();
 
         if (!result.success) {
-            throw new Error(result.message || 'Gagal memuat data Tema');
+            throw new Error(result.message || 'Gagal memuat data Metode');
         }
 
         return result.data;
     } catch (error) {
-        console.error('Error fetching Tema data:', error);
+        console.error('Error fetching Metode data:', error);
         throw error;
     }
 };
 
 
-export const useDalilData = (temaId: string) => {
+export const useCpByMetode = (faseId: string, mapelId: string, metode: string) => {
     const [data, setData] = useState<ApiResponse['data'] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -67,7 +60,7 @@ export const useDalilData = (temaId: string) => {
         try {
             setLoading(true);
             setError(null);
-            const result = await fetchDalilData(temaId);
+            const result = await fetchCpData(faseId, mapelId, metode);
             setData(result);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');

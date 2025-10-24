@@ -1,6 +1,6 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useTemaDalilData } from 'hooks/useTemaDalilData'
+import { useTemaDalilData } from 'hooks/ekoAyatHadist/useTemaDalilData'
 import LoadingScreen from 'components/LoadingScreen'
 import ItemCard from 'components/ItemCard'
 import { useLocalSearchParams, useRouter } from 'expo-router'

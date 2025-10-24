@@ -7,7 +7,7 @@ export default function RootLayout() {
     <>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
-        <Stack.Screen name="[mapelId]" />
+        <Stack.Screen name="[faseId]" />
       </Stack>
       <StatusBar style="auto" />
     </>
