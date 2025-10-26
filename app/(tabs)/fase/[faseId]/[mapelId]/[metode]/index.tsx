@@ -1,11 +1,12 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useLocalSearchParams } from 'expo-router'
 import { useCpByMetode } from 'hooks/ekoCp/useCpByMetode'
 import LoadingScreen from 'components/LoadingScreen'
 import { useRouter } from 'expo-router'
 import ItemCard from 'components/ItemCard'
 import { ucfirst } from '..'
+import { useDevice } from 'context/deviceContext'
 
 export default function CpList() {
     const router = useRouter()
@@ -41,61 +42,72 @@ export default function CpList() {
     }
 
     return (
-        <ScrollView
-            className="flex-1 bg-white"
-            refreshControl={
-                <RefreshControl
-                    refreshing={loading}
-                    onRefresh={onRefresh}
-                    colors={['#16A34A']}
-                />
-            }
-        >
-            <View className="py-10 sm:h-60 h-96 px-6 bg-green-600 rounded-b-2xl">
+        <View className="flex-1 bg-gray-50">
 
-                <View className="flex-row items-center">
+            <ScrollView
+                className="flex-1 bg-white"
+                refreshControl={
+                    <RefreshControl
+                        refreshing={loading}
+                        onRefresh={onRefresh}
+                        colors={['#16A34A']}
+                    />
+                }
+            >
+                <View className="py-10 sm:h-60 h-96 px-6 bg-green-600 rounded-b-2xl">
 
-                    <Pressable
-                        onPress={() => router.back()}
-                        className="mr-4 px-1"
-                    >
-                        <Ionicons name="arrow-back" size={28} color="white" />
-                    </Pressable>
+                    <View className="flex-row items-center">
 
-                    <View>
-                        <Text className="text-2xl font-bold text-white mb-1">
-                            Capaian Pembelajaran
-                        </Text>
-                        <Text className="text-base text-green-100">
-                            Di {ucfirst(data!.metode)}
-                        </Text>
+                        <Pressable
+                            onPress={() => router.back()}
+                            className="mr-4 px-1"
+                        >
+                            <Ionicons name="arrow-back" size={28} color="white" />
+                        </Pressable>
+
+                        <View>
+                            <Text className="text-2xl font-bold text-white mb-1">
+                                Capaian Pembelajaran
+                            </Text>
+                            <Text className="text-base text-green-100">
+                                Di {ucfirst(data!.metode)}
+                            </Text>
+                        </View>
+
                     </View>
+                </View>
+
+                <View className="p-5 mx-3 bg-white -mt-64 rounded-2xl min-h-[200px]">
+
+                    {data?.cp.map((cp: any) => (
+                        <ItemCard
+                            key={cp.id}
+                            title={cp.nama}
+                            value={cp.deskripsi}
+                            href={`/fase/${faseId}/${mapelId}/${metode}/${cp.id}`}
+                        />
+                    ))}
+
+                    {data?.cp.length === 0 && (
+                        <View className="items-center py-10 px-5">
+                            <Ionicons name="document-text" size={64} color="#6B7280" />
+                            <Text className="text-lg font-bold text-gray-900 mt-4 mb-2">
+                                Tidak Ada Data CP
+                            </Text>
+                        </View>
+                    )}
+
 
                 </View>
-            </View>
 
-            <View className="p-5 mx-3 bg-white -mt-64 rounded-2xl min-h-[200px]">
-
-                {data?.cp.map((cp: any) => (
-                    <ItemCard
-                        key={cp.id}
-                        title={cp.nama}
-                        value={cp.deskripsi}
-                        href={`/fase/${faseId}/${mapelId}/${metode}/${cp.id}`}
-                    />
-                ))}
-
-                {data?.cp.length === 0 && (
-                    <View className="items-center py-10 px-5">
-                        <Ionicons name="document-text" size={64} color="#6B7280" />
-                        <Text className="text-lg font-bold text-gray-900 mt-4 mb-2">
-                            Tidak Ada Data CP
-                        </Text>
-                    </View>
-                )}
-
-            </View>
-
-        </ScrollView>
+            </ScrollView>
+            <Pressable
+                onPress={() => router.push(`/fase/${faseId}/${mapelId}/${metode}/ai`)}
+                className="absolute bottom-5 right-5 bg-green-600 w-14 h-14 rounded-full items-center justify-center shadow-lg"
+                android_ripple={{ color: '#ffffff40', borderless: true }}
+            >
+                <MaterialCommunityIcons name="robot" size={32} color="white" />
+            </Pressable>
+        </View>
     )
 }

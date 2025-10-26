@@ -1,19 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
-import { apiGet } from 'utils/api'
-
-// URL API Anda
-const API_BASE_URL = 'https://ekotaqwa.bangkoding.my.id/api'
+import { apiGet } from 'utils/api' // pastikan path sesuai struktur kamu
 
 // --- Tipe Data berdasarkan Controller 'kuisDetail' ---
-// Tipe untuk objek kuis itu sendiri
+// Data kuis
 export type Kuis = {
     id: string
     judul: string
     deskripsi: string
-    // tambahkan properti lain jika ada (cth: created_at, dll)
+    // tambahkan properti lain jika ada (cth: created_at, updated_at)
 }
 
-// Tipe untuk riwayat pengerjaan
+// Riwayat pengerjaan kuis
 export type HasilKuis = {
     id: string
     device_id: string
@@ -27,59 +24,62 @@ export type HasilKuis = {
     created_at: string
 }
 
-// Tipe untuk seluruh data yang dikembalikan
+// Struktur data lengkap dari endpoint
 export type KuisDetailData = {
     kuis: Kuis
-    diselesaikan: number // Cth: 0 atau 1
-    hasil_kuis: HasilKuis // Array dari riwayat pengerjaan
+    diselesaikan: number // 0 atau 1
+    hasil_kuis: HasilKuis
 }
 
+// Respons API Laravel (opsional, jika mau validasi struktur)
 interface KuisDetailResponse {
-    success: boolean;
-    data: KuisDetailData;
-    message?: string;
-    code?: number;
-    timestamp?: string;
+    success: boolean
+    data: KuisDetailData
+    message?: string
+    code?: number
+    timestamp?: string
 }
 
+/**
+ * Hook untuk mengambil detail kuis berdasarkan ID kuis dan device_id
+ */
 export function useKuisDetailData(kuisId: string, deviceId: string) {
     const [data, setData] = useState<KuisDetailData | null>(null)
     const [loading, setLoading] = useState(true)
 
     const fetchKuisDetail = useCallback(async () => {
-        // Jangan fetch jika ID belum siap
-        if (!kuisId || !deviceId) {
-            return
-        }
+        if (!kuisId || !deviceId) return
 
+        setLoading(true)
         try {
-            setLoading(true)
+            // ✅ Gunakan helper apiGet agar otomatis pakai BASE_URL dan X-API-KEY
+            const response = await apiGet<KuisDetailResponse>(
+                `/v1/refleksi/kuis/${kuisId}/device/${deviceId}`
+            )
 
-            const responseData = await apiGet(`/v1/refleksi/kuis/${kuisId}/device/${deviceId}`) as KuisDetailResponse['data']
-
-            if (responseData) {
-                setData(responseData)
+            if (response?.data) {
+                setData(response.data)
             } else {
-                console.error('Failed to parse kuis detail')
+                console.warn('⚠️ Data kuis tidak ditemukan atau format tidak sesuai.')
                 setData(null)
             }
         } catch (err) {
-            console.error('Failed to fetch kuis detail:', err)
+            console.error('❌ Failed to fetch kuis detail:', err)
             setData(null)
         } finally {
             setLoading(false)
         }
     }, [kuisId, deviceId])
 
-    // Fetch data saat komponen dimuat atau ID berubah
+    // Fetch pertama kali & saat ID berubah
     useEffect(() => {
         fetchKuisDetail()
     }, [fetchKuisDetail])
 
-    // Kembalikan fungsi refetch jika diperlukan
-    const refetch = () => {
+    // Fungsi manual refetch
+    const refetch = useCallback(() => {
         fetchKuisDetail()
-    }
+    }, [fetchKuisDetail])
 
     return { data, loading, refetch }
 }

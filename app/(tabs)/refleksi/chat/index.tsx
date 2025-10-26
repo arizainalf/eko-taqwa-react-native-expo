@@ -111,7 +111,7 @@ export default function AiChatScreen() {
     const handleSend = useCallback(() => {
         if (!input.trim() || isSending) return
 
-        sendMessage(deviceId ?? '', input)
+        sendMessage(input)
         setInput('')
 
         setTimeout(() => {

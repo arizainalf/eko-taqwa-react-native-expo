@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
-import { apiGet, apiPost } from 'utils/api'
+import { apiGet } from 'utils/api'
+
 type ChatMessage = {
     id: string
     sender: 'user' | 'bot'
     text: string
 }
 
-export function useChatData(deviceId: string) {
+export function useEkoCpChatData(faseId: string, mapelId: string, metode: string, deviceId: string) {
     const [messages, setMessages] = useState<ChatMessage[]>([])
     const [loading, setLoading] = useState(false)
     const [isSending, setIsSending] = useState(false)
@@ -19,16 +20,11 @@ export function useChatData(deviceId: string) {
         setLoading(true)
 
         try {
-            const data = await apiGet<any[]>(`/v1/refleksi/chat/${deviceId}`)
+            const data = await apiGet<any[]>(`/v1/cp/${faseId}/mapel/${mapelId}/metode/${metode}/chat/${deviceId}`)
 
             if (Array.isArray(data)) {
                 const formatted = data
                     .map((item) => [
-                        {
-                            id: `${item.id}-user`,
-                            sender: 'user' as const,
-                            text: item.pesan,
-                        },
                         {
                             id: `${item.id}-bot`,
                             sender: 'bot' as const,
@@ -49,25 +45,14 @@ export function useChatData(deviceId: string) {
     /**
      * Kirim pesan ke server dan tampilkan respons bot
      */
-    const sendMessage = useCallback(async (text: string) => {
+    const sendMessage = useCallback(async () => {
         if (!deviceId) return
 
-        const userMessage: ChatMessage = {
-            id: `user-${Date.now()}`,
-            sender: 'user',
-            text,
-        }
-
-        setMessages((prev) => [...prev, userMessage])
         setIsSending(true)
 
         try {
-            const result = await apiPost<{ reply?: string }>(
-                '/v1/refleksi/chat/send',
-                {
-                    device_id: deviceId,
-                    message: text,
-                }
+            const result = await apiGet<{ reply?: string }>(
+                `/v1/cp/${faseId}/mapel/${mapelId}/metode/${metode}/send-message/${deviceId}`
             )
 
             if (result?.reply) {

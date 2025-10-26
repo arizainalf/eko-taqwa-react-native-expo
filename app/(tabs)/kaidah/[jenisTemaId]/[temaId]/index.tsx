@@ -12,7 +12,7 @@ function ucfirst(str: string) {
 
 export default function KaidahList() {
     const router = useRouter()
-    const { temaId } = useLocalSearchParams<{ temaId: string }>()
+    const { jenisTemaId, temaId } = useLocalSearchParams<{ jenisTemaId: string, temaId: string }>()
     const { data, loading, error, refetch } = useKaidahData(temaId)
 
     // [DIUBAH] Pesan typo diperbaiki
@@ -46,108 +46,117 @@ export default function KaidahList() {
     }
 
     return (
-        <ScrollView
-            // [DIUBAH] Latar belakang ScrollView jadi abu-abu
-            className="flex-1 bg-gray-50"
-            refreshControl={
-                <RefreshControl
-                    refreshing={loading}
-                    onRefresh={onRefresh}
-                    colors={['#16A34A']}
-                    tintColor="#16A34A" // [DITAMBAH] tintColor untuk iOS
-                />
-            }
-            // [DITAMBAH] contentContainerStyle untuk padding di bawah
-            contentContainerStyle={{ paddingBottom: 40 }}
-        >
-            {/* [DIUBAH] Header disamakan dengan layout Kuis/CP (h-96, padding) */}
-            <View className="h-96 pb-12 pt-6 px-6 bg-green-600 rounded-b-2xl">
-                <View className="flex-row items-center mt-5">
-                    <Pressable
-                        onPress={() => router.back()}
-                        className="mr-4 px-1 -ml-1"
-                    >
-                        <Ionicons name="arrow-back" size={28} color="white" />
-                    </Pressable>
-                    <View className="flex-1">
-                        <Text className="text-2xl font-bold text-white mb-1">
-                            Eko Kaidah</Text>
-                        <Text className="text-base text-green-100" numberOfLines={1}>
-                            {data?.tema.nama}
-                        </Text>
+        <View className="flex-1 bg-gray-50">
+
+            <ScrollView
+                // [DIUBAH] Latar belakang ScrollView jadi abu-abu
+                className="flex-1 bg-gray-50"
+                refreshControl={
+                    <RefreshControl
+                        refreshing={loading}
+                        onRefresh={onRefresh}
+                        colors={['#16A34A']}
+                        tintColor="#16A34A" // [DITAMBAH] tintColor untuk iOS
+                    />
+                }
+                // [DITAMBAH] contentContainerStyle untuk padding di bawah
+                contentContainerStyle={{ paddingBottom: 40 }}
+            >
+                {/* [DIUBAH] Header disamakan dengan layout Kuis/CP (h-96, padding) */}
+                <View className="h-96 pb-12 pt-6 px-6 bg-green-600 rounded-b-2xl">
+                    <View className="flex-row items-center mt-5">
+                        <Pressable
+                            onPress={() => router.back()}
+                            className="mr-4 px-1 -ml-1"
+                        >
+                            <Ionicons name="arrow-back" size={28} color="white" />
+                        </Pressable>
+                        <View className="flex-1">
+                            <Text className="text-2xl font-bold text-white mb-1">
+                                Eko Kaidah</Text>
+                            <Text className="text-base text-green-100" numberOfLines={1}>
+                                {data?.tema.nama}
+                            </Text>
+                        </View>
                     </View>
                 </View>
-            </View>
 
-            {/* [DIUBAH] Kartu utama, p-6 dan mx-4 agar konsisten */}
-            <View className="p-6 mx-4 bg-white -mt-64 rounded-2xl shadow-sm">
+                {/* [DIUBAH] Kartu utama, p-6 dan mx-4 agar konsisten */}
+                <View className="p-6 mx-4 bg-white -mt-64 rounded-2xl shadow-sm">
 
-                {/* [DIUBAH] Loop .map() sekarang ada di dalam kartu, 
+                    {/* [DIUBAH] Loop .map() sekarang ada di dalam kartu, 
                              menggunakan <View> BUKAN <Pressable> card-in-card */}
-                {data?.kaidah.map((kaidah, index) => (
-                    <View
-                        key={kaidah.id}
-                        // [DITAMBAH] Garis pemisah antar item
-                        className={index > 0 ? 'pt-5 mt-5 border-t border-gray-100' : ''}
-                    >
-                        {/* [DIUBAH] Badge Judul Kaidah */}
-                        <View className="flex-row mb-4 items-center bg-green-100 px-3 py-1.5 rounded-md self-start gap-2">
-                            <Ionicons name="checkmark-circle" size={18} color="#15803D" />
-                            <Text className="text-green-700 text-base font-bold">
-                                Kaidah {ucfirst(kaidah.jenis_kaidah)}
+                    {data?.kaidah.map((kaidah, index) => (
+                        <View
+                            key={kaidah.id}
+                            // [DITAMBAH] Garis pemisah antar item
+                            className={index > 0 ? 'pt-5 mt-5 border-t border-gray-100' : ''}
+                        >
+                            {/* [DIUBAH] Badge Judul Kaidah */}
+                            <View className="flex-row mb-4 items-center bg-green-100 px-3 py-1.5 rounded-md self-start gap-2">
+                                <Ionicons name="checkmark-circle" size={18} color="#15803D" />
+                                <Text className="text-green-700 text-base font-bold">
+                                    Kaidah {ucfirst(kaidah.jenis_kaidah)}
+                                </Text>
+                            </View>
+
+                            {/* [DIUBAH] Blok Teks Arab (Kaidah) */}
+                            <View className="mb-2 bg-gray-100 p-4 rounded-lg">
+                                <Text className="text-gray-900 text-2xl text-right">
+                                    {kaidah.kaidah}
+                                </Text>
+                            </View>
+
+                            {/* [DIUBAH] Blok Teks Latin */}
+                            <Text className="text-gray-500 text-sm leading-5 mb-5 italic text-right">
+                                {kaidah.kaidah_latin}
+                            </Text>
+
+                            {/* [DIUBAH] Blok Terjemahan & Penjelasan (dibuat mirip MethodBlock) */}
+                            <View className="flex-col gap-4">
+                                {kaidah.terjemahan && (
+                                    <View className="bg-gray-50 p-4 rounded-lg flex-row items-start space-x-3">
+                                        <View className="flex-1">
+                                            <View className='flex-row'>
+                                                <MaterialCommunityIcons name="abjad-arabic" size={20} color="#16A34A" />
+                                                <Text className="text-gray-500 ms-2 text-sm font-semibold mb-1">Terjemahan</Text>
+                                            </View>
+                                            <Text className="text-gray-900 text-base font-medium">{kaidah.terjemahan}</Text>
+                                        </View>
+                                    </View>
+                                )}
+                                {kaidah.deskripsi && (
+                                    <View className="bg-gray-50 p-4 rounded-lg flex-row items-start space-x-3">
+                                        <View className="flex-1">
+                                            <View className='flex-row'>
+                                                <MaterialCommunityIcons name="billboard" size={20} color="#16A34A" />
+                                                <Text className="text-gray-500 ms-2 text-sm font-semibold mb-1">Penjelasan</Text>
+                                            </View>
+                                            <Text className="text-gray-900 text-base font-medium">{kaidah.deskripsi}</Text>
+                                        </View>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    ))}
+
+                    {data?.kaidah.length === 0 && (
+                        <View className="items-center py-10 px-5">
+                            D   <Ionicons name="document-text" size={64} color="#6B7280" />
+                            <Text className="text-lg font-bold text-gray-900 mt-4 mb-2">
+                                Tidak Ada Data Eko Kaidah
                             </Text>
                         </View>
-
-                        {/* [DIUBAH] Blok Teks Arab (Kaidah) */}
-                        <View className="mb-2 bg-gray-100 p-4 rounded-lg">
-                            <Text className="text-gray-900 text-2xl text-right">
-                                {kaidah.kaidah}
-                            </Text>
-                        </View>
-
-                        {/* [DIUBAH] Blok Teks Latin */}
-                        <Text className="text-gray-500 text-sm leading-5 mb-5 italic text-right">
-                            {kaidah.kaidah_latin}
-                        </Text>
-
-                        {/* [DIUBAH] Blok Terjemahan & Penjelasan (dibuat mirip MethodBlock) */}
-                        <View className="flex-col gap-4">
-                            {kaidah.terjemahan && (
-                                <View className="bg-gray-50 p-4 rounded-lg flex-row items-start space-x-3">
-                                    <View className="flex-1">
-                                        <View className='flex-row'>
-                                            <MaterialCommunityIcons name="abjad-arabic" size={20} color="#16A34A" />
-                                            <Text className="text-gray-500 ms-2 text-sm font-semibold mb-1">Terjemahan</Text>
-                                        </View>
-                                        <Text className="text-gray-900 text-base font-medium">{kaidah.terjemahan}</Text>
-                                    </View>
-                                </View>
-                            )}
-                            {kaidah.deskripsi && (
-                                <View className="bg-gray-50 p-4 rounded-lg flex-row items-start space-x-3">
-                                    <View className="flex-1">
-                                        <View className='flex-row'>
-                                            <MaterialCommunityIcons name="billboard" size={20} color="#16A34A" />
-                                            <Text className="text-gray-500 ms-2 text-sm font-semibold mb-1">Penjelasan</Text>
-                                        </View>
-                                        <Text className="text-gray-900 text-base font-medium">{kaidah.deskripsi}</Text>
-                                    </View>
-                                </View>
-                            )}
-                        </View>
-                    </View>
-                ))}
-
-                {data?.kaidah.length === 0 && (
-                    <View className="items-center py-10 px-5">
-                        D   <Ionicons name="document-text" size={64} color="#6B7280" />
-                        <Text className="text-lg font-bold text-gray-900 mt-4 mb-2">
-                            Tidak Ada Data Eko Kaidah
-                        </Text>
-                    </View>
-                )}
-            </View>
-
-        </ScrollView>
+                    )}
+                </View>
+            </ScrollView>
+            <Pressable
+                onPress={() => router.push(`/kaidah/${jenisTemaId}/${temaId}/ai`)}
+                className="absolute bottom-5 right-5 bg-green-600 w-14 h-14 rounded-full items-center justify-center shadow-lg"
+                android_ripple={{ color: '#ffffff40', borderless: true }}
+            >
+                <MaterialCommunityIcons name="robot" size={32} color="white" />
+            </Pressable>
+        </View>
     )
 }
