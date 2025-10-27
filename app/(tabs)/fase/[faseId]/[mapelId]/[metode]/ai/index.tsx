@@ -206,7 +206,7 @@ export default function AiChatEkoCpScreen() {
                         contentContainerStyle={{
                             paddingVertical: 10,
                             flexGrow: 1,
-                            paddingBottom: 10,
+                            paddingBottom: 120,
                         }}
                     />
                 )}

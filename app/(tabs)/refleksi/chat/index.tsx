@@ -186,7 +186,7 @@ export default function AiChatScreen() {
                         contentContainerStyle={{
                             paddingVertical: 10,
                             flexGrow: 1,
-                            paddingBottom: keyboardVisible ? 20 : 10
+                            paddingBottom: keyboardVisible ? 40 : 20
                         }}
                         showsVerticalScrollIndicator={true}
                     />

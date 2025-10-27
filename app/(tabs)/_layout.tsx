@@ -9,6 +9,11 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors.success,
         headerShown: false,
+        tabBarStyle: {
+          height: 63, // ⬆️ buat tab lebih tinggi
+          paddingBottom: 6, // jarak dari bawah
+          paddingTop: 6, // jarak dari atas
+        }
       }}
     >
       <Tabs.Screen
