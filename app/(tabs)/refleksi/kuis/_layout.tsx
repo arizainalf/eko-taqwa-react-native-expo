@@ -1,10 +1,6 @@
-import { Stack, useRouter, useNavigation } from 'expo-router'
-import { Alert } from 'react-native'
-import { NavigationAction } from '@react-navigation/native'
+import { Stack } from 'expo-router'
 
 export default function KuisStackLayout() {
-    const navigation = useNavigation()
-    const router = useRouter;
     return (
         <Stack screenOptions={{
             headerShown: false,

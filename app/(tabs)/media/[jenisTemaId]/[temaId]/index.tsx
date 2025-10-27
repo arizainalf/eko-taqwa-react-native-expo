@@ -11,7 +11,7 @@ export default function MediaList() {
     const { data, loading, error, refetch } = useMediaData(temaId)
 
     if (loading && !data) {
-        return <LoadingScreen message="Memuat data eko media..." />
+        return <LoadingScreen message="Memuat data Eko Media..." />
     }
 
     const onRefresh = async () => {
@@ -23,7 +23,7 @@ export default function MediaList() {
             <View className="flex-1 justify-center items-center bg-white px-5">
                 <Ionicons name="warning" size={48} color="#6B7280" />
                 <Text className="mt-4 text-lg font-bold text-gray-900">
-                    Gagal memuat data media
+                    Gagal memuat data Eko Media
                 </Text>
                 <Text className="mt-2 text-sm text-gray-500 text-center mb-5">
                     {error}

@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
-import { apiGet, apiPost } from 'utils/api' // Import utils API
-import { HasilKuis } from './useKuisDetailData' // Asumsi tipe dari hook sebelumnya
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { apiGet, apiPost } from 'utils/api'
+import { HasilKuis } from './useKuisDetailData'
 
-// --- Tipe Data berdasarkan Controller 'pertanyaan' ---
 type OpsiPertanyaan = {
     id: string
     jawaban: string
@@ -25,20 +24,34 @@ type JawabanMap = {
     [pertanyaanId: string]: string
 }
 
-// Interface untuk API responses
 interface PertanyaanResponse {
     success: boolean
     data: PertanyaanData
-    message?: string
 }
 
 interface SubmitKuisResponse {
     success: boolean
     data: HasilKuis
-    message?: string
 }
 
-export function useKuisEngine(kuisId: string, deviceId: string) {
+export function minutesToSeconds(minutes: number | string | null | undefined): number {
+    if (!minutes) return 0
+
+    const parsed = typeof minutes === 'string' ? parseFloat(minutes) : minutes
+    if (isNaN(parsed) || parsed < 0) return 0
+
+    return parsed * 60
+}
+
+export function useKuisEngine(kuisId: string, deviceId: string, durationMinutes?: number) {
+    const [remainingTime, setRemainingTime] = useState(durationMinutes ?? 600) // default 10 menit
+
+    useEffect(() => {
+        if (durationMinutes) {
+            setRemainingTime(minutesToSeconds(durationMinutes))
+        }
+    }, [durationMinutes])
+
     const [loading, setLoading] = useState(true)
     const [questionData, setQuestionData] = useState<PertanyaanData | null>(null)
     const [jawaban, setJawaban] = useState<JawabanMap>({})
@@ -50,94 +63,99 @@ export function useKuisEngine(kuisId: string, deviceId: string) {
     const [finalResult, setFinalResult] = useState<HasilKuis | null>(null)
     const [submitError, setSubmitError] = useState<string | null>(null)
 
-    // 1. Fungsi untuk mengambil pertanyaan
+    const timerRef = useRef<NodeJS.Timeout | null>(null)
+    const submitRef = useRef<(() => Promise<void>) | null>(null)
+
+    // --- Fetch Soal ---
     const fetchNextQuestion = useCallback(async (offset: number) => {
         setLoading(true)
         try {
-            // Route: /kuis/{id}/pertanyaan?offset=...
             const data = await apiGet(`/v1/refleksi/kuis/${kuisId}/pertanyaan?offset=${offset}`) as PertanyaanResponse['data']
-
             if (data) {
                 setQuestionData(data)
             } else {
-                // Kemungkinan kuis selesai (API mengembalikan 404)
                 setQuestionData(null)
-                // Jika tidak ada pertanyaan lagi, submit hasil
-                await submitKuis()
+                await submitRef.current?.()
             }
         } catch (err) {
             console.error('Gagal mengambil pertanyaan:', err)
-            // Handle error case - mungkin kuis sudah selesai
-            if ((err as Error).message.includes('404') || (err as Error).message.includes('tidak ditemukan')) {
-                setQuestionData(null)
-                await submitKuis()
-            }
+            setQuestionData(null)
+            await submitRef.current?.()
         } finally {
             setLoading(false)
         }
     }, [kuisId])
 
-    // 2. Fungsi untuk menyimpan jawaban
+    // --- Pilih Jawaban ---
     const selectAnswer = (pertanyaanId: string, opsiId: string) => {
-        setJawaban(prev => ({
-            ...prev,
-            [pertanyaanId]: opsiId,
-        }))
+        setJawaban(prev => ({ ...prev, [pertanyaanId]: opsiId }))
     }
 
-    // 3. Fungsi untuk mengirim semua jawaban ke API
-    const submitKuis = async () => {
+    // --- Submit Kuis ---
+    const submitKuis = useCallback(async () => {
+        if (isSubmitting || isFinished) return
+
         setIsSubmitting(true)
         setSubmitError(null)
-        const waktuPengerjaan = Math.floor((Date.now() - startTime) / 1000) // dalam detik
 
+        const waktuPengerjaan = Math.floor((Date.now() - startTime) / 1000)
         try {
-            // Route: POST /kuis
             const data = await apiPost('/v1/refleksi/kuis', {
                 device_id: deviceId,
                 kuis_id: kuisId,
-                jawaban: jawaban,
+                jawaban,
                 waktu_pengerjaan: waktuPengerjaan,
             }) as SubmitKuisResponse['data']
 
-            if (data) {
-                setFinalResult(data)
-            } else {
-                const errorMessage = data || 'Gagal menyimpan hasil: API tidak memberikan pesan.'
-                console.error('Kuis Submit Error (API):', errorMessage, data)
-                setSubmitError(errorMessage)
-            }
+            setFinalResult(data ?? null)
         } catch (err) {
-            const errorMessage = (err as Error).message || 'Gagal terhubung ke server.'
-            console.error('Kuis Submit Error (Network/Parse):', err)
-            setSubmitError(errorMessage)
+            setSubmitError((err as Error).message || 'Gagal terhubung ke server.')
         } finally {
             setIsSubmitting(false)
             setIsFinished(true)
+            if (timerRef.current) clearInterval(timerRef.current)
         }
-    }
+    }, [deviceId, kuisId, jawaban, startTime, isSubmitting, isFinished])
 
-    // 4. Fungsi untuk tombol "Selanjutnya"
+    // simpan ke ref agar tidak trigger rerender loop
+    useEffect(() => {
+        submitRef.current = submitKuis
+    }, [submitKuis])
+
+    // --- Timer Countdown ---
+    useEffect(() => {
+        if (!kuisId || !deviceId) return
+        setStartTime(Date.now())
+        fetchNextQuestion(0)
+
+        timerRef.current = setInterval(() => {
+            setRemainingTime(prev => {
+                if (prev <= 1) {
+                    clearInterval(timerRef.current!)
+                    submitRef.current?.()
+                    return 0
+                }
+                return prev - 1
+            })
+        }, 1000)
+
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current)
+        }
+    }, [kuisId, deviceId, fetchNextQuestion]) // ← dependensi minimal
+
+    // --- Next Question ---
     const handleNextQuestion = () => {
         if (!questionData) return
-
-        const isLastQuestion = questionData.nomor === questionData.total
-        if (isLastQuestion) {
-            submitKuis()
+        const isLast = questionData.nomor === questionData.total
+        if (isLast) {
+            submitRef.current?.()
         } else {
             const nextOffset = currentOffset + 1
             setCurrentOffset(nextOffset)
             fetchNextQuestion(nextOffset)
         }
     }
-
-    // 5. Load pertanyaan pertama saat hook dijalankan
-    useEffect(() => {
-        if (kuisId && deviceId) {
-            setStartTime(Date.now())
-            fetchNextQuestion(0)
-        }
-    }, [kuisId, deviceId, fetchNextQuestion])
 
     return {
         loading,
@@ -148,6 +166,7 @@ export function useKuisEngine(kuisId: string, deviceId: string) {
         isFinished,
         isSubmitting,
         finalResult,
-        submitError, // Export submitError juga untuk ditampilkan di UI
+        submitError,
+        remainingTime,
     }
 }

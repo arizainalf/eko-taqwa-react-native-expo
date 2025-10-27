@@ -29,14 +29,14 @@ export default function HomeScreen() {
   };
 
   if (loading && !data) {
-    return <LoadingScreen message="Memuat data aplikasi..." />;
+    return <LoadingScreen message="Memuat data Aplikasi ..." />;
   }
 
   if (error) {
     return (
       <View className="flex-1 justify-center items-center p-5 bg-white">
         <Ionicons name="warning" size={48} color="#6B7280" />
-        <Text className="text-lg font-bold text-gray-800 mt-4 mb-2">Gagal memuat data</Text>
+        <Text className="text-lg font-bold text-gray-800 mt-4 mb-2">Gagal memuat data Aplikasi</Text>
         <Text className="text-sm text-gray-500 text-center mb-5">{error}</Text>
         <Pressable
           className="bg-green-600 px-5 py-3 rounded-lg active:bg-green-700"

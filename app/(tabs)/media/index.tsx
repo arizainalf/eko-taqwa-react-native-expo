@@ -1,7 +1,7 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useJenisTemaData } from '../../../hooks/useJenisTemaData'
-import LoadingScreen from '../../../components/LoadingScreen'
+import { useJenisTemaData } from 'hooks/useJenisTemaData'
+import LoadingScreen from 'components/LoadingScreen'
 import InfoCardFull from 'components/InfoCardFull'
 import ItemCard from 'components/ItemCard'
 
@@ -9,7 +9,7 @@ export default function JenisTemaList() {
     const { data, loading, error, refetch } = useJenisTemaData()
 
     if (loading && !data) {
-        return <LoadingScreen message="Memuat data fase pembelajaran..." />
+        return <LoadingScreen message="Memuat data Eko Media..." />
     }
 
     const onRefresh = async () => {
@@ -21,7 +21,7 @@ export default function JenisTemaList() {
             <View className="flex-1 justify-center items-center bg-white px-5">
                 <Ionicons name="warning" size={48} color="#6B7280" />
                 <Text className="mt-4 text-lg font-bold text-gray-900">
-                    Gagal memuat data Jenis Tema
+                    Gagal memuat data Eko Media
                 </Text>
                 <Text className="mt-2 text-sm text-gray-500 text-center mb-5">
                     {error}

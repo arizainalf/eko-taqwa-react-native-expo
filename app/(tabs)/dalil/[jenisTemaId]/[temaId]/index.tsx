@@ -17,7 +17,7 @@ export default function DalilList() {
 
     if (loading && !data) {
         // [DIUBAH] Pesan disesuaikan
-        return <LoadingScreen message="Memuat data Eko Dalil..." />
+        return <LoadingScreen message="Memuat data Eko Ayat Hadist..." />
     }
 
     const onRefresh = async () => {

@@ -7,6 +7,7 @@ export type Kuis = {
     id: string
     judul: string
     deskripsi: string
+    batas_waktu: number
     // tambahkan properti lain jika ada (cth: created_at, updated_at)
 }
 
@@ -53,12 +54,12 @@ export function useKuisDetailData(kuisId: string, deviceId: string) {
         setLoading(true)
         try {
             // ✅ Gunakan helper apiGet agar otomatis pakai BASE_URL dan X-API-KEY
-            const response = await apiGet<KuisDetailResponse>(
+            const response = await apiGet<KuisDetailResponse['data']>(
                 `/v1/refleksi/kuis/${kuisId}/device/${deviceId}`
             )
 
-            if (response?.data) {
-                setData(response.data)
+            if (response) {
+                setData(response)
             } else {
                 console.warn('⚠️ Data kuis tidak ditemukan atau format tidak sesuai.')
                 setData(null)

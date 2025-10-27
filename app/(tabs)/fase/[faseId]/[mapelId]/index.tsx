@@ -1,9 +1,8 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useMetodeData } from 'hooks/ekoCp/useMetodeData'
 import LoadingScreen from 'components/LoadingScreen'
-import { useRouter } from 'expo-router'
 import ItemCard from 'components/ItemCard'
 
 export function ucfirst(str: string) {
@@ -17,7 +16,7 @@ export default function MetodeList() {
   const { data, loading, error, refetch } = useMetodeData(faseId, mapelId)
 
   if (loading && !data) {
-    return <LoadingScreen message="Memuat data metode..." />
+    return <LoadingScreen message="Memuat data Eko Cp..." />
   }
 
   const onRefresh = async () => {
@@ -29,7 +28,7 @@ export default function MetodeList() {
       <View className="flex-1 justify-center items-center bg-white px-5">
         <Ionicons name="warning" size={48} color="#6B7280" />
         <Text className="mt-4 text-lg font-bold text-gray-900">
-          Gagal memuat data metode
+          Gagal memuat data Eko CP
         </Text>
         <Text className="mt-2 text-sm text-gray-500 text-center mb-5">
           {error}

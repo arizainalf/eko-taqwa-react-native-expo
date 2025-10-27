@@ -1,7 +1,7 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useFaseData } from '../../../hooks/ekoCp/useFaseData'
-import LoadingScreen from '../../../components/LoadingScreen'
+import { useFaseData } from 'hooks/ekoCp/useFaseData'
+import LoadingScreen from 'components/LoadingScreen'
 import InfoCard from 'components/InfoCard'
 import ItemCard from 'components/ItemCard'
 
@@ -9,7 +9,7 @@ export default function FaseList() {
   const { data, loading, error, refetch } = useFaseData()
 
   if (loading && !data) {
-    return <LoadingScreen message="Memuat data fase pembelajaran..." />
+    return <LoadingScreen message="Memuat data Eko CP..." />
   }
 
   const onRefresh = async () => {
@@ -21,7 +21,7 @@ export default function FaseList() {
       <View className="flex-1 justify-center items-center bg-white px-5">
         <Ionicons name="warning" size={48} color="#6B7280" />
         <Text className="mt-4 text-lg font-bold text-gray-900">
-          Gagal memuat data Fase
+          Gagal memuat data Eko Cp
         </Text>
         <Text className="mt-2 text-sm text-gray-500 text-center mb-5">
           {error}

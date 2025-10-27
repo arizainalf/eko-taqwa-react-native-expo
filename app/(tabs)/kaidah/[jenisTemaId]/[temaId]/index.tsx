@@ -4,6 +4,7 @@ import { useKaidahData } from 'hooks/ekoKaidah/useKaidahData'
 import LoadingScreen from 'components/LoadingScreen'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 
+
 // Fungsi ucfirst Anda sudah bagus, tidak perlu diubah
 function ucfirst(str: string) {
     if (!str) return str;

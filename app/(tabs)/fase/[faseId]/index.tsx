@@ -1,9 +1,8 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useMapelData } from 'hooks/ekoCp/useMapelByFase'
 import LoadingScreen from 'components/LoadingScreen'
-import { useRouter } from 'expo-router'
 import InfoCardFull from 'components/InfoCardFull'
 import ItemCard from 'components/ItemCard'
 
@@ -13,7 +12,7 @@ export default function MapelList() {
   const { data, loading, error, refetch } = useMapelData(faseId)
 
   if (loading && !data) {
-    return <LoadingScreen message="Memuat data Mata Pelajaran pembelajaran..." />
+    return <LoadingScreen message="Memuat data Eko Cp..." />
   }
 
   const onRefresh = async () => {
@@ -25,7 +24,7 @@ export default function MapelList() {
       <View className="flex-1 justify-center items-center bg-white px-5">
         <Ionicons name="warning" size={48} color="#6B7280" />
         <Text className="mt-4 text-lg font-bold text-gray-900">
-          Gagal memuat data Mata Pelajaran
+          Gagal memuat data Eko Cp
         </Text>
         <Text className="mt-2 text-sm text-gray-500 text-center mb-5">
           {error}

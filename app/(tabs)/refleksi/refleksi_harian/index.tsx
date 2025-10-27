@@ -64,7 +64,7 @@ export default function PostsScreen() {
                                 await deletePost(postId)
                                 onRefresh()
                             } catch (error) {
-                                Alert.alert('Gagal', 'Terjadi kesalahan saat menghapus data.')
+                                Alert.alert('Gagal', 'Terjadi kesalahan saat menghapus data. '+ error)
                             }
                         },
                     },

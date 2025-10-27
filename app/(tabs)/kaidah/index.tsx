@@ -1,7 +1,7 @@
 import { View, Text, Pressable, RefreshControl, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useJenisTemaData } from '../../../hooks/useJenisTemaData'
-import LoadingScreen from '../../../components/LoadingScreen'
+import { useJenisTemaData } from 'hooks/useJenisTemaData'
+import LoadingScreen from 'components/LoadingScreen'
 import InfoCardFull from 'components/InfoCardFull'
 import ItemCard from 'components/ItemCard'
 
